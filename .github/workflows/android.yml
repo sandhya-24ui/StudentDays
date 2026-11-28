@@ -17,9 +17,9 @@ jobs:
         with: { distribution: temurin, java-version: 21 }
       - run: npm install
       - name: Prepare www folder
-     run: |
-       mkdir -p www
-       cp index.html config.js asset* www/ 2>/dev/null || true
+        run: |
+          mkdir -p www
+          cp index.html config.js asset* www/ 2>/dev/null || true
       - name: Create Android project (first run only)
         run: |
           if [ ! -d android ]; then npx cap add android; fi
