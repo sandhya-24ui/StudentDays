@@ -18,8 +18,9 @@ jobs:
       - run: npm install
       - name: Prepare www folder
         run: |
-          mkdir -p www
-          cp index.html config.js asset* www/ 2>/dev/null || true
+          mkdir -p www/assets
+          cp index.html config.js www/ 2>/dev/null || true
+          cp asset* www/assets/ 2>/dev/null || true
       - name: Create Android project (first run only)
         run: |
           if [ ! -d android ]; then npx cap add android; fi
