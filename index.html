@@ -406,7 +406,7 @@ body.prod .wb,body.prod .skipb,body.prod #signin .hint{display:none!important}
   <section class="screen on" id="intro">
     <video id="vid" muted playsinline></video>
     <div class="pulse" id="pulse"></div>
-    <button class="skip" onclick="go('welcome')">Skip</button><button class="skip" id="snd" style="left:20px;right:auto" onclick="const v=$('vid');v.muted=!v.muted;this.textContent=v.muted?'Sound off':'Sound on'">Sound off</button>
+    <button class="skip" onclick="introDone()">Skip</button><button class="skip" id="snd" style="left:20px;right:auto" onclick="const v=$('vid');v.muted=!v.muted;this.textContent=v.muted?'Sound off':'Sound on'">Sound off</button>
   </section>
 
   <!-- 2 Sign in -->
@@ -549,11 +549,14 @@ function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   $(id).classList.add('on');$('app').dataset.s=id;if(id==='welcome')meStu=null;if(id==='home'){['kvid','avid'].forEach(k=>{const v=$(k);if(v&&v.play)v.play().catch(()=>{})})}
 }
+let introHandled=false;
+function stopIntro(){if(introHandled)return false;introHandled=true;const v=$('vid');if(v){v.onended=null;v.onerror=null;try{v.pause()}catch(e){}}return true}
+function introDone(){if(stopIntro())go('welcome')} /* runs once; live.js replaces this to restore a saved session */
 function startIntro(){
   if(INTRO_SRC){
     const v=$('vid'); v.src=INTRO_SRC; $('pulse').style.display='none';
-    v.play().catch(()=>{}); v.onended=()=>go('welcome'); v.onerror=()=>go('welcome');
-  } else { timer=setTimeout(()=>go('welcome'),3000); }
+    v.play().catch(()=>{}); v.onended=()=>introDone(); v.onerror=()=>introDone();
+  } else { timer=setTimeout(()=>introDone(),3000); }
 }
 function sendOtp(k){
   const val=$(k).value.trim();
@@ -1593,6 +1596,8 @@ async function payNow(p){
 const VML=document.querySelector('.vmh-l').src;
 startIntro();
 </script>
+<script src="qr.js"></script>
+<script src="live.js"></script>
 <script>
 /* --- native bridge: hardware back button + status bar --- */
 (function(){
