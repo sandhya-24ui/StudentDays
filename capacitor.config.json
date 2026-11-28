@@ -1,0 +1,10 @@
+{
+  "appId": "co.studentdays.app",
+  "appName": "StudentDays",
+  "webDir": "www",
+  "backgroundColor": "#050505",
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  }
+}

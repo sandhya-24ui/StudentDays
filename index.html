@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Student Days – App Prototype</title>
+<style>
+:root{--bg:#050505;--card:#141414;--line:#262626;--tx:#fff;--mut:#9a9a9a;--blue:#0a6cff;--blue2:#4d96ff;color-scheme:dark}
+@media (prefers-color-scheme:light){:root{--bg:#050505}}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#000;font-family:-apple-system,"SF Pro Display","Segoe UI",Roboto,sans-serif;color:var(--tx)}
+body{display:flex;justify-content:center;align-items:center}
+#app{position:relative;width:100%;max-width:430px;height:100%;max-height:900px;background:var(--bg);overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 20px) 20px calc(env(safe-area-inset-bottom,0px) + 20px);overflow-y:auto}
+.screen.on{display:flex}
+/* logo */
+#logo{position:absolute;z-index:20;left:50%;top:50%;transform:translate(-50%,-50%);width:240px;opacity:0;transition:all 1s cubic-bezier(.6,0,.2,1);pointer-events:none}
+#logo.show{opacity:1}
+#logo.head{left:18px;top:calc(env(safe-area-inset-top,0px) + 21px);transform:none;width:84px}
+/* intro */
+#intro{align-items:center;justify-content:center;padding:0;background:#000}
+#intro video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#intro .pulse{width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,var(--blue) 0,transparent 70%);animation:p 1.6s ease-in-out infinite}
+@keyframes p{50%{transform:scale(1.6);opacity:.4}}
+.skip{position:absolute;right:20px;top:calc(env(safe-area-inset-top,0px) + 16px);background:#ffffff22;border:0;color:#fff;padding:8px 16px;border-radius:20px;font-size:14px;z-index:5}
+/* forms */
+h1{font-size:30px;letter-spacing:-.5px;margin-top:10px}
+.sub{color:var(--mut);margin:6px 0 22px}
+label{display:block;font-size:13px;color:var(--mut);margin:14px 0 6px}
+input,select{width:100%;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--tx);font-size:16px;outline:none}
+input:focus,select:focus{border-color:var(--blue)}
+.row{display:flex;gap:10px}.row>*{flex:1}.row .btn-s{flex:0 0 auto}
+.btn,.btn-s{border:0;border-radius:14px;background:var(--blue);color:#fff;font-weight:700;font-size:16px;padding:16px;cursor:pointer}
+.btn-s{padding:0 16px;font-size:14px;background:#fff;color:#000;border-radius:12px}
+.btn:disabled{background:#262626;color:#6b6b6b}
+.otp{display:none;margin-top:8px}.otp.on{display:block}
+.ok{color:#4d96ff;font-size:13px;margin-top:6px;display:none}.ok.on{display:block}
+.hint{color:var(--mut);font-size:12px;margin-top:6px}
+.spacer{flex:1;min-height:20px}
+.back{width:44px;height:44px;border-radius:50%;background:#2a2a2a;border:0;color:#fff;font-size:20px;flex:none}
+.top{display:flex;align-items:center;gap:14px}
+/* city */
+.note{background:var(--card);border-radius:16px;padding:16px;color:#ddd;margin:18px 0}
+.cities{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.city{height:170px;border-radius:20px;border:2px solid transparent;display:flex;justify-content:center;padding-top:12px;font-weight:800;font-size:17px;color:#fff;cursor:pointer;background-size:cover;background-position:center;text-shadow:0 1px 6px #0008}
+.city.sel{border-color:var(--blue);box-shadow:0 0 0 3px #0a6cff55}
+.c1{background:linear-gradient(#0a6cff,#06214d)}.c2{background:linear-gradient(#fff3,#0a6cff 60%,#021)}
+.c3{background:linear-gradient(#4d96ff,#08306b)}.c4{background:var(--card)}
+/* home */
+.hd{display:flex;justify-content:flex-end;align-items:center;gap:12px;height:48px;margin-bottom:12px}
+.ic{width:42px;height:42px;border-radius:50%;background:#1c1c1c;display:grid;place-items:center;position:relative}
+.ic i{position:absolute;top:8px;right:9px;width:8px;height:8px;background:#ff4b3a;border-radius:50%}
+.av{background:linear-gradient(135deg,var(--blue),#fff)}
+.banner{border-radius:22px;padding:22px;min-height:190px;background:linear-gradient(120deg,#0a1f4d,var(--blue));display:flex;flex-direction:column;justify-content:space-between}
+.banner b{font-size:22px;line-height:1.15;max-width:60%}
+.banner .btn{align-self:flex-start;padding:10px 22px;background:#fff;color:#000}
+h2{font-size:21px;margin:22px 0 10px;display:flex;justify-content:space-between;align-items:baseline}
+h2 span{font-size:13px;color:var(--mut);font-weight:500}
+.hs{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.tile{flex:none;width:130px;height:150px;border-radius:16px;padding:10px;display:flex;align-items:flex-end;font-weight:600;font-size:14px;background:linear-gradient(#0a6cff55,#000)}
+.tile.sm{width:100px;height:90px;font-size:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.act{padding:16px;border-radius:16px;font-weight:700;font-size:14px}
+.a1{background:#0a6cff22;color:#7db3ff}.a2{background:#fff;color:#000}
+.nav{margin-top:20px;background:#111;border-radius:24px;padding:12px;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;text-align:center;font-size:13px;position:sticky;bottom:0}
+.nav .mid{color:var(--blue2);font-weight:700}
+#home{padding:0}
+.hd2{display:flex;justify-content:flex-end;align-items:center;gap:12px;height:calc(76px + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) 18px 0;background:#0b0b0b;flex:none}
+.hd2 .ic{background:#222}.hd2 svg{width:22px;height:22px}
+.scroll{flex:1;overflow-y:auto;padding:16px 16px 24px}
+.banner{height:236px;border-radius:24px;background:linear-gradient(90deg,#0000 35%,#000a),url(assets/asset01.jpg) 25% center/cover;position:relative;overflow:hidden}
+.bt{position:absolute;right:16px;top:44px;width:48%;text-align:right;font:italic 700 22px/1.12 Georgia,serif;text-shadow:0 2px 8px #000a}
+.apply{position:absolute;right:16px;bottom:16px;border:2px solid var(--blue);background:#0a6cffcc;color:#fff;font-weight:700;font-size:15px;padding:10px 22px;border-radius:30px}
+.dots{display:flex;justify-content:center;gap:8px;margin-top:12px}.dots b{width:10px;height:10px;border-radius:50%;background:#3a3a3a}.dots b:first-child{background:var(--blue)}
+.ft{flex:none;position:relative;display:grid;grid-template-columns:1fr 112px 1fr;gap:8px;align-items:center;background:#0b0b0b;border-radius:26px 26px 0 0;padding:14px 12px calc(env(safe-area-inset-bottom,0px) + 14px);margin-top:6px}
+.fi{display:flex;align-items:center;gap:10px;background:#161616;border-radius:18px;padding:14px 10px;font-size:14px;font-weight:600;line-height:1.2}
+.fi svg{flex:none}.fi.r{padding-left:14px}
+.fm{display:flex;flex-direction:column;align-items:center}
+.circ{width:84px;height:84px;margin-top:-52px;border-radius:50%;background:#0b0b0b;border:3px solid #2b2b2b;display:grid;place-items:center;position:relative}
+.circ u{position:absolute;top:6px;right:8px;width:14px;height:14px;border-radius:50%;background:#2ee66b}
+.fm em{font-style:normal;color:var(--blue2);font-size:13px;font-weight:600;margin-top:6px;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){#logo{transition:none}#intro .pulse{animation:none}}
+</style>
+<style>
+/* glass system */
+#app::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 40% at 90% 0%,#0a6cff55,transparent 70%),radial-gradient(70% 40% at 0% 100%,#0a6cff44,transparent 70%);pointer-events:none}
+.glass,.btn,.btn-s,.apply,.back,.skip,.skipb,.ic,.act,.fi,.circ,.ft{background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.05));-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(255,255,255,.05),0 8px 24px rgba(0,0,0,.45);color:#fff}
+.btn,.apply{background:linear-gradient(180deg,rgba(90,160,255,.85),rgba(10,108,255,.6));border-color:rgba(255,255,255,.35)}
+.btn:disabled{background:linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.03));color:#777;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.btn-s{color:#fff;font-weight:600}
+.a1{color:#9cc6ff}.a2{color:#fff}
+.skipb{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600}
+.toprow{display:flex;justify-content:flex-end}
+.hd2{background:transparent}
+.cities .city{box-shadow:0 8px 24px rgba(0,0,0,.4)}
+/* footer */
+.ft{margin:6px 12px calc(env(safe-area-inset-bottom,0px) + 10px);padding:12px 8px 12px;border-radius:32px;grid-template-columns:1fr 104px 1fr;gap:4px;border-top-color:rgba(255,255,255,.3)}
+.fi{flex-direction:column;justify-content:center;gap:6px;background:none;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;text-align:center;font-size:12px;font-weight:600;color:#e8e8e8;padding:6px 4px}
+.fi.r{padding-left:4px}
+.circ{width:80px;height:80px;margin-top:-46px;background:radial-gradient(circle at 30% 20%,rgba(120,175,255,.55),rgba(10,108,255,.25) 60%,rgba(0,0,0,.4));border:1.5px solid rgba(255,255,255,.45);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 10px 28px rgba(10,108,255,.45),0 0 0 6px rgba(5,5,5,.9)}
+.circ img{width:46px;height:auto;display:block}
+.circ u{top:4px;right:6px;box-shadow:0 0 0 3px #050505,0 0 10px #2ee66b}
+.fm em{font-size:12px;margin-top:8px}
+</style>
+<style>
+/* trips */
+.hdr{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.hdr h1{margin:0;font-size:25px}.hdr p{margin:2px 0 0;color:var(--mut);font-size:13px}
+.seg{display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);margin-bottom:12px}
+.seg button{border:0;background:none;color:#aaa;font-weight:600;font-size:14px;padding:10px;border-radius:12px}
+.seg button.on{background:linear-gradient(180deg,rgba(90,160,255,.8),rgba(10,108,255,.55));color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px}
+.chip{flex:none;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;color:#ddd;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.chip.on{background:rgba(10,108,255,.55);color:#fff;border-color:rgba(255,255,255,.4)}
+.tcard{border-radius:22px;overflow:hidden;margin-bottom:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.cov{height:130px;padding:12px;display:flex;align-items:flex-start;justify-content:space-between}
+.pill{font-size:12px;font-weight:700;padding:5px 10px;border-radius:12px;background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.tb{padding:14px}.tb b{font-size:18px;display:block}.tb .m{color:var(--mut);font-size:13px;margin-top:4px}
+.tb .pr{display:flex;justify-content:space-between;align-items:center;margin-top:12px}.pr strong{font-size:20px}.pr small{color:var(--mut)}
+.low{color:#ffb347!important}
+.dh{height:230px;margin:-20px -20px 0;padding:calc(env(safe-area-inset-top,0px) + 16px) 20px 20px;display:flex;flex-direction:column;justify-content:space-between}
+.dsec{margin-top:20px}.dsec h3{font-size:17px;margin-bottom:8px}
+.dsec li{margin:0 0 6px 18px;color:#d6d6d6;font-size:14px;line-height:1.4}
+.day{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06);margin-bottom:8px;font-size:14px}.day b{display:block;margin-bottom:2px}
+.lnk{color:var(--blue2);font-weight:600;font-size:14px;margin-top:8px;display:inline-block}
+.bar{position:sticky;bottom:0;margin:20px -20px calc(-1*(env(safe-area-inset-bottom,0px) + 20px));padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;align-items:center;gap:14px;background:rgba(10,10,10,.8);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.12)}
+.bar .btn{flex:1}.bar strong{font-size:20px}.bar small{display:block;color:var(--mut);font-size:12px}
+.stp{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06)}
+.stp div{display:flex;align-items:center;gap:16px;font-size:20px;font-weight:700}.stp button{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-size:20px}
+.bd{padding:14px;border-radius:14px;background:rgba(255,255,255,.06);font-size:14px}.bd p{display:flex;justify-content:space-between;margin:6px 0}.bd .t{border-top:1px solid #333;padding-top:10px;font-weight:700;font-size:16px}
+.opt{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid transparent;margin-bottom:8px;font-size:15px}
+.opt.on{border-color:var(--blue);background:rgba(10,108,255,.18)}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#ccc;margin-top:16px;line-height:1.4}.chk input{width:20px;height:20px;flex:none;margin-top:1px}
+.err{color:#ff6b5e;font-size:13px;margin-top:10px;min-height:16px}
+.tk{margin:18px 0;padding:20px;border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.22);text-align:center}
+.tk svg{background:#fff;padding:10px;border-radius:14px;margin:14px 0}.tk code{font-size:18px;letter-spacing:2px}
+.st{font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px}.st.upcoming{background:#0a6cff55;color:#9cc6ff}.st.completed{background:#2ee66b33;color:#7df0a5}.st.cancelled{background:#ff4b3a33;color:#ff8f84}
+.mrow{display:flex;gap:10px;margin-top:12px}.mrow .btn{flex:1;padding:12px;font-size:14px}
+.empty{text-align:center;color:var(--mut);padding:40px 10px;line-height:1.5}
+.toast{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);z-index:60;padding:12px 18px;border-radius:20px;background:rgba(30,30,30,.9);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.2);font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;max-width:86%;text-align:center}.toast.on{opacity:1}
+.ov{position:absolute;inset:0;z-index:70;background:rgba(0,0,0,.6);display:none;align-items:flex-end}.ov.on{display:flex}
+.sheet{width:100%;padding:24px 20px calc(env(safe-area-inset-bottom,0px) + 20px);border-radius:28px 28px 0 0;background:rgba(28,28,28,.95);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,.2)}
+.sheet p{color:#ddd;line-height:1.5;margin:8px 0 18px}
+select.sel{margin-bottom:10px}
+</style>
+<style>
+#veil{position:absolute;inset:0;z-index:15;display:none;background:rgba(5,5,5,.35);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);pointer-events:none}
+#app:not([data-s="home"]) #logo{visibility:hidden}
+.pst{height:390px;background-size:cover;background-position:center;position:relative}
+.pst .pill{position:absolute}.pst .p1{left:12px;top:12px}.pst .p2{right:12px;top:12px}
+.pst .pg{position:absolute;inset:auto 0 0 0;height:90px;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+.dh2{height:330px;margin:-20px -20px 0;padding:calc(env(safe-area-inset-top,0px) + 16px) 20px 20px;display:flex;flex-direction:column;justify-content:space-between;background-size:cover;background-position:center}
+.pb{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px}.pb div{padding:12px 8px;border-radius:14px;text-align:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);font-size:11px;color:#aaa}.pb b{display:block;font-size:16px;color:#fff;margin-top:4px}
+.pb div:nth-child(2){background:rgba(10,108,255,.3)}
+.pl{margin:0 0 6px;padding:0;list-style:none}.pl li{padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.06);margin-bottom:6px;font-size:14px}
+.night{padding:12px 14px;border-radius:14px;background:rgba(10,108,255,.22);border:1px solid rgba(77,150,255,.35);font-size:13px;margin-top:6px}.night b{display:block;color:#9cc6ff;margin-bottom:2px}
+.sig{padding:16px;border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.22);margin-top:12px}.sig b{display:block;font-size:20px;margin:4px 0}
+.mt{width:100%;border-collapse:collapse;font-size:13px}.mt td,.mt th{padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top}.mt th{color:#9cc6ff}
+.ok2 li::marker{color:#2ee66b}.no2 li::marker{color:#ff6b5e}
+</style>
+<style>
+#ov-p{white-space:pre-line}
+.avs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.av-b{aspect-ratio:1;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);font-size:24px}
+.av-b.on{border-color:var(--blue);background:rgba(10,108,255,.3)}
+.note{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px 14px;font-size:13px;color:#ccc;line-height:1.45;margin-top:14px}
+.note b{color:#fff}
+.sp3{display:flex;align-items:center;margin:12px 0 4px}.sp3 i{flex:1;height:2px;background:#333}.sp3 i.on{background:var(--blue)}
+.sp3 span{width:12px;height:12px;border-radius:50%;background:#333;flex:none}.sp3 span.on{background:var(--blue2);box-shadow:0 0 0 4px #0a6cff44}
+.sl{display:flex;justify-content:space-between;font-size:11px;color:#9a9a9a}.sl b{color:#fff}
+.rt{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.msgs{flex:1;overflow-y:auto;padding:4px 0 10px;min-height:0}
+.bw{display:flex;gap:8px;margin-bottom:12px;align-items:flex-end}.bw.me{justify-content:flex-end}
+.bav{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;font-size:18px;flex:none}
+.bb{max-width:75%;padding:10px 14px;border-radius:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);font-size:15px;line-height:1.35;word-break:break-word}
+.me .bb{background:linear-gradient(180deg,rgba(90,160,255,.85),rgba(10,108,255,.6))}
+.bn{display:block;font-size:11px;color:#9cc6ff;margin-bottom:2px;border:0;background:none;padding:0;font-weight:700}
+.cin{display:flex;gap:8px;padding-top:8px}.cin input{flex:1}.cin .btn-s{padding:0 18px}
+.ban{background:rgba(255,75,58,.18);border:1px solid rgba(255,75,58,.4);border-radius:14px;padding:12px;font-size:13px;color:#ffb3aa}
+.ch{margin:0;display:flex;gap:8px;margin-bottom:10px}
+</style>
+<style>#intro video{object-fit:contain;transform:scale(1.8)}</style>
+<style>
+.pps{max-height:92%;overflow-y:auto;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 24px)}
+.pps h2{font-size:23px;line-height:1.15;margin-right:44px}
+.px{position:absolute;right:16px;top:16px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:16px}
+.perks{margin:14px 0;padding:0;list-style:none}.perks li{padding:9px 0 9px 28px;position:relative;font-size:14px;color:#e6e6e6;border-bottom:1px solid #262626}.perks li::before{content:"\2713";position:absolute;left:4px;color:var(--blue2);font-weight:800}
+.price{display:flex;align-items:baseline;gap:8px;padding:14px;border-radius:16px;background:linear-gradient(135deg,rgba(10,108,255,.45),rgba(10,108,255,.12));border:1px solid rgba(77,150,255,.45)}
+.price b{font-size:32px}.price span{color:#cfe0ff;font-size:14px}
+.quote{font-style:italic;color:#cfe0ff;margin:10px 2px 0;font-size:14px;line-height:1.4}
+.pcard{aspect-ratio:1.586;border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;color:#fff;background:radial-gradient(120% 90% at 85% 10%,#1a3f94,transparent 60%),linear-gradient(145deg,#0a2a78,#030a1a);border:1px solid rgba(255,255,255,.2);box-shadow:0 14px 34px rgba(10,108,255,.35)}
+.pcard img{width:104px;display:block}
+.pcard .t1{font-size:10px;letter-spacing:3px;margin-top:12px;color:#dbe6ff}.pcard .t2{font-size:25px;font-weight:800;letter-spacing:2px}
+.pcard .t3{font-size:8px;letter-spacing:2.5px;color:#9cc6ff;margin-top:4px}
+.pcard .mid{position:absolute;left:18px;bottom:14px;font-size:11px;line-height:1.5;color:#b8c8ee}.pcard .mid b{display:block;font-size:14px;letter-spacing:2px;color:#fff}
+.pcard svg{position:absolute;right:16px;bottom:14px;width:78px;height:78px;background:#fff;padding:5px;border-radius:8px}
+</style>
+<style>
+/* student passport page (light) */
+.lt{background:#f5f7fb!important;color:#0b1220}
+.lt h1,.lt h2,.lt h3{color:#0b1220}
+.lt label{color:#5b6577}
+.lt input,.lt select{background:#fff;color:#0b1220;border:1px solid #d6dcea}
+.lt input[readonly]{background:#eef2f9}
+.lt .hint,.lt .sub,.lt .m{color:#5b6577}
+.lt .back{background:#fff;color:#0b1220;border:1px solid #d6dcea;box-shadow:0 4px 12px rgba(15,30,70,.1)}
+.lt .chip{background:#fff;color:#27324a;border:1px solid #d6dcea}
+.lt .chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.lt .chk{color:#27324a}
+.lt .err{color:#d6382b}
+.btn.gl{background:rgba(10,108,255,.1);color:#0a6cff;border:1px solid #bcd5ff;box-shadow:none}
+.sp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.sp-top img{height:28px}
+.sp-h1{font-size:30px;line-height:1.05;font-weight:900;letter-spacing:-.5px;text-transform:uppercase;margin:6px 0 10px}
+.sp-h1 em{font:italic 400 29px Georgia,serif;color:#0a6cff;text-transform:none}
+.sp-p{color:#4a566c;line-height:1.5;margin:0 0 16px}
+.sp-hero{position:relative;height:300px;border-radius:26px;background-size:cover;background-position:62% center;overflow:hidden;margin-top:20px;box-shadow:0 14px 34px rgba(10,30,80,.2)}
+.sp-hero .tx{position:absolute;inset:0 0 auto 0;padding:18px 18px 70px;background:linear-gradient(rgba(3,10,26,.85),transparent);color:#fff}
+.sp-hero h2{font-size:22px;font-weight:900;color:#fff}.sp-hero p{font-size:13px;color:#dbe6ff;margin-top:4px;line-height:1.4}
+.spc{margin:-56px 12px 0;position:relative;z-index:2;border-radius:22px;padding:16px;color:#fff;background:linear-gradient(145deg,#0a2a78,#030a1a);box-shadow:0 18px 40px rgba(3,10,26,.4)}
+.spc-h{display:flex;justify-content:space-between;align-items:center}.spc-h img{height:30px}
+.tagp{font-size:10px;font-weight:800;letter-spacing:1.5px;padding:4px 9px;border-radius:10px;background:rgba(255,255,255,.16)}
+.spc-t{font-size:12px;letter-spacing:3px;margin:12px 0;color:#dbe6ff}
+.spc-g{display:grid;grid-template-columns:1fr 1fr;gap:10px}.spc-g small{display:block;font-size:9px;letter-spacing:1.5px;color:#9cc6ff}.spc-g b{font-size:14px}
+.spc-bar{height:8px;border-radius:5px;background:rgba(255,255,255,.18);margin-top:14px;overflow:hidden}.spc-bar i{display:block;height:100%;background:linear-gradient(90deg,#4d96ff,#fff);border-radius:5px;transition:width .8s}
+.spc-s{display:block;margin-top:8px;font-size:11px;color:#b8c8ee}
+.sec{margin-top:34px}.sec>h2{font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:-.3px;line-height:1.1;margin-bottom:8px}
+.lc{background:#fff;border:1px solid #e3e8f2;border-radius:22px;box-shadow:0 6px 20px rgba(15,30,70,.08);padding:18px}
+.stepc{display:flex;gap:14px;position:relative;padding-bottom:20px}
+.stepc:not(:last-child)::before{content:"";position:absolute;left:23px;top:52px;bottom:2px;width:2px;background:linear-gradient(#0a6cff,#cfe0ff)}
+.si{width:48px;height:48px;border-radius:16px;background:#e6efff;display:grid;place-items:center;flex:none}
+.stepc small{font-size:11px;font-weight:800;color:#0a6cff;letter-spacing:2px}.stepc h3{font-size:17px;margin:2px 0 3px}.stepc p{font-size:14px;color:#4a566c;line-height:1.45;margin:0}
+.lvs{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 20px 16px;margin:0 -20px}
+.lv{flex:none;width:252px;scroll-snap-align:start;border-radius:24px;padding:18px;background:#fff;border:1.5px solid #e3e8f2;box-shadow:0 6px 18px rgba(15,30,70,.08);transition:transform .25s,box-shadow .25s;color:#0b1220}
+.lv.sel{transform:translateY(-4px);border-color:#0a6cff;box-shadow:0 14px 30px rgba(10,108,255,.22)}
+.lv.blue{background:linear-gradient(180deg,#fff,#eaf2ff)}.lv.silver{background:linear-gradient(180deg,#fff,#edf0f5)}.lv.gold{background:linear-gradient(180deg,#fffdf4,#fbf0cf)}.lv.plat{background:linear-gradient(180deg,#fff,#e6eff8)}
+.lv small{display:block;margin-top:10px;font-size:11px;letter-spacing:2px;color:#5b6577;font-weight:700}.lv h3{font-size:22px;letter-spacing:1px;margin:2px 0 6px}.lv p{font-size:13px;color:#4a566c;line-height:1.45;margin:0 0 6px}.lv .ln{font-weight:700;color:#0b1220}
+.rw{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:14px;background:rgba(10,108,255,.08);font-size:13px;font-weight:600;color:#0b1220;margin-top:8px}.rw svg{flex:none}
+.req{display:inline-block;margin-top:10px;font-size:11px;font-weight:700;padding:5px 10px;border-radius:10px;background:#0b1220;color:#fff}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tl2{padding:14px;border-radius:18px;background:#fff;border:1px solid #e3e8f2}.tl2 small{font-size:11px;color:#5b6577;font-weight:600}.tl2 b{display:block;font-size:24px;margin-top:2px}.tl2 span{font-size:11px;color:#5b6577}
+.pbar{height:10px;border-radius:6px;background:#e3e8f2;overflow:hidden;margin:8px 0 6px}.pbar i{display:block;height:100%;background:linear-gradient(90deg,#4d96ff,#0a6cff);border-radius:6px;transition:width .8s}
+.demo-b{font-size:11px;font-weight:800;letter-spacing:1.2px;color:#8a5a00;background:#fff3cf;border:1px solid #f0d58a;border-radius:10px;padding:7px 10px;margin-bottom:10px;text-align:center}
+.hl{list-style:none;margin:10px 0 0;padding:0}.hl li{display:flex;justify-content:space-between;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid #e3e8f2;margin-bottom:8px;font-size:14px}.hl small{color:#5b6577}
+.coin{position:absolute;bottom:40%;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff3b0,#e0ac1c);border:2px solid #b88400;animation:cf 1.2s ease-out forwards;pointer-events:none}
+@keyframes cf{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1}100%{transform:translateY(-150px) scale(1);opacity:0}}
+.bgr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bc{min-height:210px;border-radius:22px;background-size:cover;background-position:center;position:relative;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:14px}
+.bc::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(3,10,26,.1),rgba(3,10,26,.88))}.bc>*{position:relative}
+.bc .gi{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:grid;place-items:center;position:absolute;top:12px;left:12px}
+.bc b{font-size:12px;letter-spacing:1.2px}.bc p{font-size:12px;line-height:1.4;color:#dbe6ff;margin:4px 0 0}
+.warn{background:#fff8e6;border:1px solid #f0d58a;border-radius:16px;padding:14px;font-size:13px;color:#5b4300;line-height:1.45;margin-top:14px}.warn b{display:block;margin-bottom:2px}
+.fee{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding:14px 16px;border-radius:18px;background:#e6efff;color:#0b1220}.fee b{font-size:26px}
+.idon{padding:12px 14px;border-radius:12px;background:#eaf7ee;border:1px solid #bfe3c9;font-size:14px;color:#14532d}.idon small{display:block;color:#3f7a54;margin-top:2px}
+.paybox{margin-top:12px;border-radius:16px;padding:14px;background:#eef4ff;border:1px solid #c9dcff;font-size:13px;color:#1b2a4a;line-height:1.5}.paybox code{display:block;font-size:11.5px;color:#0a3d99;margin:2px 0}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #9cc6ff;border-top-color:#0a6cff;border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px;margin-right:6px}@keyframes sp{to{transform:rotate(360deg)}}
+.tm{background:#fff;border:1px solid #e3e8f2;border-radius:20px;overflow:hidden}.tm summary{cursor:pointer;font-weight:800;padding:16px;font-size:14px;letter-spacing:.3px}
+.tm details{border-top:1px solid #e3e8f2}.tm details summary{font-weight:700;font-size:14px;padding:13px 16px}.tm details p{padding:0 16px 14px;margin:0;font-size:13px;line-height:1.55;color:#3a465c}
+.tm summary:focus-visible,.lv:focus-visible{outline:2px solid #0a6cff;outline-offset:2px}
+.story{text-align:center;font-weight:900;letter-spacing:1px;font-size:15px;margin:34px 0 10px;text-transform:uppercase}
+@media (prefers-reduced-motion:reduce){.coin{animation:none;opacity:0}.spc-bar i,.pbar i{transition:none}.lv{transition:none}}
+</style>
+<style>
+/* welcome + auth + admin */
+.wb{position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);padding:10px 16px;border-radius:20px;font-size:13px;font-weight:600;z-index:3;background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.05));-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 8px 24px rgba(0,0,0,.45);color:#fff}
+.wl{left:16px}.wr{right:16px}
+.wmid{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 40px);text-align:center}
+.wmid img{width:150px;margin-bottom:22px}.wmid h1{font-size:30px;margin:0 0 6px}.wmid .wh{font-size:17px;font-weight:700;color:var(--blue2);margin:0 0 6px}.wmid .sub{margin:0 0 22px}
+#home.nonew .hd2 .ic i{display:none}
+.lt textarea{width:100%;padding:14px;border-radius:12px;border:1px solid #d6dcea;background:#fff;color:#0b1220;font:inherit;font-size:16px;min-height:96px;resize:vertical;outline:none}
+.nb{display:inline-block;min-width:18px;margin-left:6px;padding:1px 6px;border-radius:9px;background:#ff4b3a;color:#fff;font-size:11px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 4px}
+.fact{padding:12px;border-radius:16px;background:#fff;border:1px solid #e3e8f2;box-shadow:0 4px 14px rgba(15,30,70,.06)}.fact b{display:block;font-size:17px;color:#0a6cff}.fact span{font-size:12px;color:#4a566c;line-height:1.35}
+.adc{margin-bottom:10px}.adc .rt b{font-size:16px}.adc .m{font-size:13px;margin-top:3px;line-height:1.4}
+.adc .mrow .btn{padding:10px;font-size:13px}
+.tag2{display:inline-block;font-size:11px;font-weight:700;padding:4px 9px;border-radius:9px;background:#e6efff;color:#0a4fc0;margin:6px 6px 0 0}.tag2.g{background:#e3f6ea;color:#14532d}.tag2.r{background:#ffe3df;color:#a3281b}.tag2.y{background:#fff3cf;color:#8a5a00}
+.nt{padding:14px;border-radius:18px;background:#fff;border:1px solid #e3e8f2;margin-bottom:10px}.nt b{display:block;font-size:15px}.nt p{margin:4px 0;font-size:14px;color:#3a465c;line-height:1.45}.nt small{color:#7a8499}
+</style>
+<style>
+.car{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:0 16px;scroll-padding-left:16px;scrollbar-width:none}
+.car::-webkit-scrollbar{display:none}
+.car .banner{flex:0 0 92%;scroll-snap-align:start}
+.car .kb{background:linear-gradient(transparent 60%,rgba(0,0,0,.35)),url(assets/asset02.jpg) center/cover}
+.car .mb{background:linear-gradient(transparent 60%,rgba(0,0,0,.4)),url(assets/asset03.jpg) center 38%/cover}
+.dots b:first-child:not(.on){background:#3a3a3a}.dots b.on{background:var(--blue)}
+.khero{height:250px;margin:-20px -20px 0;padding:calc(env(safe-area-inset-top,0px) + 16px) 20px 16px;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:space-between}
+.kimg{height:130px;border-radius:14px;background-size:cover;background-position:center;margin-bottom:10px}
+.kh2{font-size:12px;letter-spacing:2px;color:var(--blue2);font-weight:700;margin:14px 0 4px}
+.kbt{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kbt div{padding:12px;border-radius:14px;text-align:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);font-size:13px}.kbt b{display:block;font-size:20px}
+.kbt .cl{opacity:.45}.kbt .ft{background:rgba(10,108,255,.3);border-color:rgba(77,150,255,.6)}
+.rtl{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:#dbe6ff}.rtl span{padding:5px 10px;border-radius:12px;background:rgba(255,255,255,.1)}
+.blk{display:flex;gap:10px;padding:8px 0;border-top:1px solid #262626;font-size:14px}.blk>b{flex:0 0 84px;color:#9cc6ff;font-size:12px;letter-spacing:1px;padding-top:2px}.blk ul{margin:0;padding:0;list-style:none}.blk li{margin:0 0 4px;line-height:1.4}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ig div{padding:12px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:13px;line-height:1.35}.ig b{display:block;font-size:13px;margin-bottom:2px}
+a.btn{display:block;text-align:center;text-decoration:none}
+:root{--show:url(assets/asset04.jpg)}
+.car .sb{background:linear-gradient(transparent 55%,rgba(0,0,0,.45)),var(--show) center 30%/cover}
+.tile.shw{background:linear-gradient(transparent 50%,rgba(0,0,0,.55)),var(--show) center 28%/cover;align-items:flex-end;cursor:pointer}
+
+.scroll h2 span{color:var(--blue2);cursor:pointer;font-size:13px;font-weight:600}
+.hs.snap{scroll-snap-type:x mandatory;margin:0 -16px;padding:0 16px 8px;scroll-padding-left:16px;scrollbar-width:none}.hs.snap::-webkit-scrollbar{display:none}
+.hc{flex:0 0 78%;max-width:310px;height:176px;border-radius:20px;position:relative;overflow:hidden;background-size:cover;background-position:var(--pos,center);scroll-snap-align:start;display:block;color:#fff;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.14);cursor:pointer;background-color:#0b1a3a}
+.hc::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,.6));pointer-events:none;z-index:1}
+.hc>*{z-index:2}.hc>.hv{z-index:0}
+.hv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hp{position:absolute;left:10px;top:10px;background:rgba(10,108,255,.55);border:1px solid rgba(255,255,255,.35);font-size:11px}
+.hb{position:absolute;left:12px;right:12px;bottom:10px}.hb b{display:block;font-size:15px;line-height:1.2}.hb small{font-size:12px;color:#cfe0ff}
+.cta{position:absolute;right:10px;bottom:10px;padding:8px 14px;border-radius:16px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(180deg,rgba(90,160,255,.85),rgba(10,108,255,.6));border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 6px 16px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.play{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.5);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.play::before{content:"";position:absolute;left:20px;top:15px;border-left:15px solid #fff;border-top:10px solid transparent;border-bottom:10px solid transparent}
+</style>
+<style>
+textarea{width:100%;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:inherit;font-size:16px;min-height:80px;outline:none;resize:vertical}
+.vmhome{margin-top:16px;border-radius:24px;min-height:170px;background-size:cover;background-position:center 30%;position:relative;overflow:hidden;cursor:pointer;border:1px solid rgba(255,255,255,.16);box-shadow:0 10px 28px rgba(0,0,0,.45)}
+.vmhome::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(3,10,26,.92) 30%,rgba(10,108,255,.25))}
+.vmh-t{position:relative;padding:18px;max-width:78%}.vmh-t small{letter-spacing:3px;font-size:10px;color:var(--blue2);font-weight:800}.vmh-t b{display:block;font-size:22px;margin:4px 0}.vmh-t p{font-size:13px;color:#d6e4ff;line-height:1.4;margin:0 0 12px}
+#vm{padding:0}
+.vm-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 16px) 20px 6px}.vm-h h1{font-size:25px;margin:0}.vm-h p{margin:2px 0 0;color:var(--mut);font-size:13px}
+.vscroll{flex:1;overflow-y:auto;padding:8px 16px 16px}
+.vnav{flex:none;display:grid;grid-template-columns:repeat(5,1fr);margin:0 12px calc(env(safe-area-inset-bottom,0px) + 10px);padding:8px 4px;border-radius:26px;background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.05));-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 8px 24px rgba(0,0,0,.45)}
+.vnav button{background:none;border:0;color:#bbb;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;position:relative}.vnav button.on{color:#fff}.vnav button.on svg{stroke:#4d96ff}
+.vnav .vb{position:absolute;top:0;right:18%;min-width:16px;padding:0 4px;border-radius:8px;background:#ff4b3a;color:#fff;font-size:10px;line-height:16px}
+.vcard{border-radius:24px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);overflow:hidden;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.vcov{height:120px;background-size:cover;background-position:center;position:relative}
+.vsmp{position:absolute;right:10px;top:10px;font-size:10px;padding:4px 8px;border-radius:10px;background:rgba(0,0,0,.5);color:#cfe0ff;border:1px solid rgba(255,255,255,.25)}
+.vavb{width:64px;height:64px;border-radius:50%;margin:-32px 0 0 16px;background:#0b1a3a center/cover;border:3px solid #0a0a0a;display:grid;place-items:center;font-size:32px;position:relative}
+.vbody{padding:8px 16px 16px}.vbody h3{font-size:19px;margin:6px 0 2px}.vbody .m{font-size:13px;color:#a8b3c9}
+.vt{display:inline-block;padding:5px 10px;border-radius:12px;font-size:12px;background:rgba(77,150,255,.16);color:#bcd5ff;margin:5px 5px 0 0}.vt.h{background:rgba(255,255,255,.08);color:#ddd}.vt.s{background:#0a6cff;color:#fff}
+.vq{font-style:italic;color:#d6e4ff;margin:10px 0 0;font-size:14px;line-height:1.4}
+.vph{display:flex;gap:8px;overflow-x:auto;margin:12px -16px 0;padding:0 16px}.vph div{flex:none;width:92px;height:118px;border-radius:14px;background-size:cover;background-position:center;position:relative;overflow:hidden;border:2px solid #0a6cff;cursor:pointer}
+.vph span{position:absolute;left:0;right:0;bottom:0;padding:14px 6px 5px;font-size:10px;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+.vmatch{font-size:12px;font-weight:700;color:#7db3ff;margin-top:12px}
+.vcta{width:100%;margin-top:10px}
+.vseg{margin:8px 16px 4px}
+.vsec{font-size:12px;letter-spacing:2px;color:var(--blue2);font-weight:800;margin:14px 2px 8px}
+.vrow{display:flex;gap:12px;align-items:center;padding:14px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);margin-bottom:8px;font-size:15px;cursor:pointer}.vrow svg{flex:none}.vrow span{flex:1}.vrow i{font-style:normal;color:#9a9a9a}
+.vrq{padding:14px;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);margin-bottom:12px}.vrq .top{display:flex;gap:12px;align-items:center}.vrq .vavb{margin:0;width:50px;height:50px;font-size:26px;border-width:2px}
+.vwz{display:flex;gap:6px;margin:6px 0 14px}.vwz i{flex:1;height:4px;border-radius:2px;background:#2a2a2a}.vwz i.on{background:var(--blue)}
+.lc2{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:14px;background:rgba(255,255,255,.06);margin-bottom:8px}.lc2>div:nth-child(2) input,.lc2>div:nth-child(2) select{margin-bottom:6px;padding:10px;font-size:14px}
+.vthumb{flex:none;width:64px;height:84px;border-radius:12px;background-size:cover;background-position:center}
+.mimg{display:block;max-width:100%;border-radius:12px;margin-bottom:4px}
+.mt{display:block;font-size:10px;opacity:.7;margin-top:3px;text-align:right}.rx{position:absolute;margin-top:2px;font-size:14px}
+#vmc .bb{position:relative;padding-bottom:8px}
+#svw{position:absolute;inset:0;z-index:90;background:#000;display:none}#svw.on{display:block}
+.svbg{position:absolute;inset:0;background-size:contain;background-repeat:no-repeat;background-position:center}
+.svt{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 24px;background:linear-gradient(rgba(0,0,0,.6),transparent);z-index:3}
+.svp{display:flex;gap:4px;margin-bottom:10px}.svp i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden;position:relative}.svp i.d::after{content:"";position:absolute;inset:0;background:#fff}.svp i.a::after{content:"";position:absolute;inset:0;background:#fff;transform-origin:left;animation:sv 5s linear forwards}
+@keyframes sv{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.svh{display:flex;align-items:center;gap:8px;font-size:14px}.svh .vavb{margin:0;width:34px;height:34px;font-size:18px;border-width:1px}.svh span{opacity:.8;font-size:12px}.svh button{margin-left:auto;background:none;border:0;color:#fff;font-size:20px}
+.svc{position:absolute;left:0;right:0;bottom:70px;padding:40px 18px 10px;background:linear-gradient(transparent,rgba(0,0,0,.75));z-index:3;pointer-events:none}.svc p{margin:4px 0;font-size:15px;line-height:1.4}.svc .q{font-size:20px;font-style:italic;font-weight:600}
+.svz{position:absolute;top:70px;bottom:120px;left:0;width:40%;z-index:2}.svz.r{left:auto;right:0}
+.sva{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;justify-content:center;gap:10px;z-index:4}.sva .btn{padding:10px 22px;font-size:14px}
+@media (prefers-reduced-motion:reduce){.svp i.a::after{animation:none;transform:none}}
+</style>
+<style>
+.vmhome{background:linear-gradient(135deg,#ffffff 45%,#e3eeff);border:1px solid #cfe0ff;box-shadow:0 10px 28px rgba(10,108,255,.25)}
+.vmhome::before{display:none}
+.vmh-i{position:absolute;right:6px;bottom:6px;width:46%;max-width:190px;opacity:.95}
+.vmh-t{max-width:62%}
+.vmh-t small{display:flex;align-items:center;gap:6px;color:#0a6cff}
+.vmh-l{width:24px;height:auto}
+.vmh-t b{color:#0b1220}.vmh-t p{color:#3a4a66}
+</style>
+<style>.vml{height:26px;width:auto;vertical-align:-5px}</style>
+<style>
+.vavb{overflow:hidden}.vavb svg{width:100%;height:100%;display:block}
+#vmo{background:radial-gradient(70% 32% at 92% 0%,rgba(10,108,255,.35),transparent 70%),radial-gradient(60% 30% at 0% 100%,rgba(10,108,255,.25),transparent 70%),#050505}
+.vhero{position:relative;padding:18px 16px 18px;margin-bottom:14px;border-radius:26px;background:linear-gradient(135deg,#0a3a9c,#0a6cff 55%,#06214d);overflow:hidden;box-shadow:0 14px 34px rgba(10,108,255,.35);min-height:150px}
+.vhero::after{content:"";position:absolute;right:-50px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.1)}
+.vhero h1{font-size:27px;margin:10px 0 4px;position:relative}.vhero p{margin:0;font-size:13px;color:#dbe8ff;position:relative;max-width:56%;line-height:1.4}
+.vml.big{height:30px;position:relative}
+.vfl{position:absolute;right:12px;top:14px;display:grid;grid-template-columns:repeat(2,54px);gap:8px;z-index:1}
+.vfl i{display:block;width:54px;height:54px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.75);animation:fl 3.2s ease-in-out infinite;animation-delay:var(--d);box-shadow:0 6px 14px rgba(0,0,0,.3)}.vfl i:nth-child(even){margin-top:16px}
+.vfl svg{width:100%;height:100%;display:block}
+@keyframes fl{50%{transform:translateY(-6px)}}
+.vstep{display:flex;align-items:center;margin:4px 4px 14px}
+.vs span{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#16213a;border:1px solid #2a3a60;font-size:14px;font-weight:800;color:#fff}
+.vs.cur span{background:linear-gradient(180deg,#5aa0ff,#0a6cff);border-color:#9cc6ff;box-shadow:0 0 0 5px rgba(10,108,255,.3)}
+.vs.done span{background:#0a6cff;border-color:#0a6cff}
+.vstep b{flex:1;height:3px;background:#22304f;margin:0 4px;border-radius:2px}.vstep b.on{background:var(--blue)}
+.vlive{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.2);margin-bottom:14px;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.vlive b{display:block;font-size:16px}.vlive>div:last-child>div{font-size:12px;color:#bcd0ff;margin-top:2px}
+.vpanel{padding:14px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);margin-bottom:12px}
+.vtt{font-size:19px;font-weight:800;margin:0 0 2px}.vts{font-size:13px;color:#9fb0d4;margin:0 0 12px}
+.vag{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:10px}
+.vav{background:none;border:0;color:#cfd8ee;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0}
+.vavc{width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid transparent;transition:transform .2s,box-shadow .2s;box-shadow:0 6px 14px rgba(0,0,0,.4)}.vavc svg{width:100%;height:100%;display:block}
+.vav.on .vavc{border-color:#4d96ff;box-shadow:0 0 0 4px rgba(77,150,255,.35),0 8px 18px rgba(10,108,255,.5);transform:scale(1.06)}.vav.on{color:#fff}
+.vchips{flex-wrap:wrap;overflow:visible}
+.vchip{padding:10px 14px;font-size:14px;border-radius:22px}
+.vchip.on{background:linear-gradient(180deg,#5aa0ff,#0a6cff);color:#fff;border-color:#9cc6ff;box-shadow:0 6px 16px rgba(10,108,255,.45)}
+.vcnt{font-size:12px;color:#7db3ff;font-weight:700;margin-top:10px}
+@media (prefers-reduced-motion:reduce){.vfl i{animation:none}.vavc{transition:none}}
+</style>
+<style id="native-overrides">
+/* --- native app overrides (StudentDays Android) --- */
+html,body{background:#000;overscroll-behavior:none}
+@media (max-width:500px){#app{max-width:none;max-height:none}}
+/* Production mode (see www/config.js): hides prototype-only controls (PRD AUTH-08, ADM-SEC-01) */
+body.prod .wb,body.prod .skipb,body.prod #signin .hint{display:none!important}
+</style>
+<script src="config.js"></script>
+</head>
+<body class="prod">
+<div id="app">
+  <div id="veil"></div><img id="logo" src="assets/asset05.png" alt="Student Days">
+
+  <!-- 1 Intro -->
+  <section class="screen on" id="intro">
+    <video id="vid" muted playsinline></video>
+    <div class="pulse" id="pulse"></div>
+    <button class="skip" onclick="go('welcome')">Skip</button><button class="skip" id="snd" style="left:20px;right:auto" onclick="const v=$('vid');v.muted=!v.muted;this.textContent=v.muted?'Sound off':'Sound on'">Sound off</button>
+  </section>
+
+  <!-- 2 Sign in -->
+  <section class="screen" id="signin">
+    <div class="toprow" style="justify-content:space-between"><button class="back" style="width:40px;height:40px" onclick="go('welcome')" aria-label="Back">&lsaquo;</button><button class="skipb" onclick="go('city')">Skip for now</button></div>
+    <h1>Create your account</h1>
+    <p class="sub">Verify your details to join Student Days.</p>
+    <label>Full name</label><input id="name" placeholder="Your name" oninput="chk()">
+    <label>Mobile number</label>
+    <div class="row"><input id="mob" inputmode="numeric" maxlength="10" placeholder="10-digit number" oninput="chk()"><button class="btn-s" onclick="sendOtp('mob')">Send OTP</button></div>
+    <div class="otp" id="mob-o"><input id="mob-c" inputmode="numeric" maxlength="4" placeholder="Enter OTP" oninput="verify('mob')"></div>
+    <div class="ok" id="mob-ok">Mobile verified</div>
+    <label>Email</label>
+    <div class="row"><input id="eml" type="email" placeholder="you@college.edu" oninput="chk()"><button class="btn-s" onclick="sendOtp('eml')">Send OTP</button></div>
+    <div class="otp" id="eml-o"><input id="eml-c" inputmode="numeric" maxlength="4" placeholder="Enter OTP" oninput="verify('eml')"></div>
+    <div class="ok" id="eml-ok">Email verified</div>
+    <label>College name</label><input id="col" placeholder="Your college" oninput="chk()">
+    <div class="row">
+      <div><label>Year</label><select id="yr" onchange="chk()"><option value="">Select</option><option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option><option>5th year</option></select></div>
+      <div><label>Age</label><input id="age" inputmode="numeric" maxlength="2" placeholder="Age" oninput="chk()"></div>
+    </div>
+    <label>College ID number</label><input id="cid" placeholder="ID on your college card" oninput="chk()">
+    <div class="note" style="margin-top:14px"><b>Join VibeMate</b><br>Discover students who match your interests and explore experiences together.<div class="chips" style="margin:10px 0 0;flex-wrap:wrap"><button class="chip" id="vj-y" onclick="vjSet('yes')">Yes, Create My VibeMate Profile</button><button class="chip on" id="vj-n" onclick="vjSet('later')">Maybe Later</button></div></div>
+    <p class="hint">Prototype: any OTP of 4 digits works (demo code 1234).</p>
+    <div class="spacer"></div>
+    <button class="btn" id="signBtn" disabled onclick="go('city')" style="margin-top:20px">Continue</button>
+  </section>
+
+  <!-- 3 City -->
+  <section class="screen" id="city">
+    <div class="top"><button class="back" onclick="go('signin')">‹</button><div><h1 style="margin:0;font-size:28px">Choose your city</h1><p class="sub" style="margin:2px 0 0">Select the city you are in</p></div></div>
+    <div class="note">Location access is turned off for Student Days. Choose a city now; you can enable it later in Settings.</div>
+    <div class="cities">
+      <div class="city c1" onclick="pick(this)">Hyderabad</div>
+      <div class="city c2" onclick="pick(this)">Vijayawada</div>
+      <div class="city c3" onclick="pick(this)">Visakhapatnam</div>
+      <div class="city c4" onclick="pick(this)" style="align-items:center;padding:0">Madikeri</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" id="cityBtn" disabled onclick="reveal()" style="margin-top:20px">Continue</button>
+  </section>
+
+  <!-- 4 Logo reveal -->
+  <section class="screen" id="reveal"></section>
+
+  <!-- Home -->
+  <section class="screen" id="home">
+    <header class="hd2"><div class="ic" onclick="openNotifs()" role="button" aria-label="Notifications"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15z"/><path d="M10 21h4"/></svg><i></i></div><div class="ic av"></div></header>
+    <main class="scroll">
+      <div class="car" id="car"><div class="banner"><div class="bt">Your Identity for Exclusive Experiences</div><button class="apply" onclick="openPassport()">APPLY&nbsp;&nbsp;&rarr;</button></div><div class="banner kb" role="group" aria-label="Kerala is Happening, Oct 31 to Nov 5"><button class="apply" onclick="openKerala()">Get Insights</button></div><div class="banner mb" role="group" aria-label="Podam Manali this December"><button class="apply" onclick="nfOpen()">Get Notified</button></div><div class="banner sb" role="group" aria-label="Student Reality Travel Show, launching soon"><span class="pill" style="position:absolute;left:12px;top:12px">Launching soon!</span><button class="apply" onclick="showOpen()">Know more</button></div></div>
+      <div class="dots" id="cdots"><b class="on"></b><b></b><b></b><b></b></div>
+      <div class="vmhome" role="button" tabindex="0" onclick="openVM()" onkeydown="if(event.key==='Enter')openVM()" aria-label="Find Your VibeMate"><img class="vmh-i" src="assets/asset06.png" alt=""><div class="vmh-t"><small><img class="vmh-l" src="assets/asset06.png" alt=""> VIBEMATE</small><b>Find Your VibeMate</b><p>Discover students who match your vibe. Explore &amp; experience things together.</p><span class="cta" style="position:static;display:inline-block">Explore VibeMate &rsaquo;</span></div></div>
+      <h2>Upcoming Student Only Trips <span onclick="openTrips()">See All &rsaquo;</span></h2>
+      <div class="hs snap">
+        <div class="hc" role="button" tabindex="0" data-bg="kerala" aria-label="Kerala is Happening, Oct 31 to Nov 5" onclick="openKerala()"><span class="pill hp">Oct 31 &ndash; Nov 5</span><span class="cta">Get Insights &rsaquo;</span></div>
+        <div class="hc" role="button" tabindex="0" data-bg="manali" style="--pos:center 36%" aria-label="Podam Manali, December" onclick="nfOpen()"><span class="pill hp">December</span><span class="cta">Get Notified &rsaquo;</span></div>
+      </div>
+      <h2>Documentary Stories</h2>
+      <div class="hs snap">
+        <div class="hc" role="button" tabindex="0" aria-label="Trip to Kerala Documentary, coming soon" onclick="sheet('Trip to Kerala Documentary','Coming soon. We are editing the story of the Kerala trip.','OK')"><video class="hv" id="kvid" muted loop playsinline autoplay></video><span class="pill hp">Coming soon</span><div class="hb"><b>Trip to Kerala Documentary</b><small>Coming soon</small></div></div>
+        <a class="hc" id="dc-araku" data-bg="araku" target="_blank" rel="noopener" aria-label="Vizag and Araku Trip Documentary, click to watch"><video class="hv" id="avid" muted loop playsinline autoplay></video><span class="pill hp">Click to watch</span><i class="play"></i><div class="hb"><b>Vizag &amp; Araku Trip Documentary</b><small>Click to watch &rsaquo;</small></div></a>
+      </div>
+      <h2>Events &amp; Shows Happening</h2>
+      <div class="hs snap">
+        <div class="hc" role="button" tabindex="0" data-bg="nye" aria-label="Students NYE 2027, coming up" onclick="evtOpen()"><span class="pill hp">Coming up</span><span class="cta">Know more &rsaquo;</span></div>
+        <div class="hc" role="button" tabindex="0" data-bg="show" aria-label="Student Reality Travel Show, coming up" onclick="showOpen()"><span class="pill hp">Coming up</span><span class="cta">Know more &rsaquo;</span></div>
+      </div>
+      <div class="two"><div class="act a1">Upload Your Story &rsaquo;</div><div class="act a2">Watch Stories &rsaquo;</div></div>
+    </main>
+    <footer class="ft">
+      <div class="fi" onclick="openPT()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M17 14c2.5 0 4.2 1.8 4.2 4.5"/></svg><span>Create<br>Private Trip</span></div>
+      <div class="fm" onclick="openChat()"><div class="circ"><img src="assets/asset07.png" alt="Anonymous Chat"><u></u></div><em>Anonymous Chat</em></div>
+      <div class="fi" onclick="openVM()" role="button" aria-label="VibeMate"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-8-5.5-8-11a4.5 4.5 0 018-3 4.5 4.5 0 018 3c0 5.5-8 11-8 11z"/></svg><span>VIBEmate</span></div>
+    </footer>
+  </section>
+
+  <!-- Upcoming trips -->
+  <section class="screen" id="trips">
+    <div class="hdr"><button class="back" onclick="go('home')">&lsaquo;</button><div><h1>Upcoming trips</h1><p>November and December</p></div></div>
+    <div class="seg"><button id="sg-ex" class="on" onclick="seg('ex')">Explore</button><button id="sg-my" onclick="seg('my')">My trips</button></div>
+    <div id="ex-view"><select class="sel" id="cityf" onchange="renderTrips()"></select><div class="chips" id="chips"></div><div id="tlist"></div></div>
+    <div id="my-view" style="display:none"><div class="chips" id="mychips"></div><div id="mlist"></div></div>
+  </section>
+
+  <section class="screen" id="tdetail"></section>
+
+  <section class="screen" id="book"></section>
+
+  <section class="screen" id="done"></section>
+
+  
+  <section class="screen" id="pt">
+    <div class="hdr"><button class="back" onclick="go('home')">&lsaquo;</button><div><h1>Create private trip</h1><p>Plan with friends. We send a quote.</p></div></div>
+    <div class="seg"><button id="pt-new" class="on" onclick="ptSeg('new')">New trip</button><button id="pt-my" onclick="ptSeg('my')">My requests</button></div>
+    <div id="ptf"></div><div id="ptl" style="display:none"></div>
+  </section>
+  <section class="screen" id="ac1"></section>
+  <section class="screen" id="ac2"></section>
+  <section class="screen" id="acr"></section>
+  <section class="screen" id="ac3"></section>
+  <div class="ov" id="ov2"><div class="sheet" id="ov2s"></div></div>
+      <section class="screen lt" id="sp"></section>
+  <section class="screen lt" id="spd"></section>
+  <section class="screen lt" id="spk"></section>
+  
+  <section class="screen" id="welcome" style="padding:0">
+    <button class="wb wl" onclick="go('hl')">Host login</button>
+    <button class="wb wr" onclick="go('adl')">Admin login</button>
+    <div class="wmid"><img id="wlogo" alt="Student Days"><h1>Are you a student?</h1><p class="wh">Welcome to StudentDays.co</p><p class="sub">Sign up here with your student details.</p>
+      <div class="mrow"><button class="btn" onclick="go('signin')">Sign up</button><button class="btn" style="background:rgba(255,255,255,.12)" onclick="go('signin')">Sign in</button></div></div>
+  </section>
+  <section class="screen" id="adl"><div class="hdr"><button class="back" onclick="go('welcome')" aria-label="Back">&lsaquo;</button><div><h1>Admin login</h1><p>Authorised staff only</p></div></div>
+    <label>Admin ID</label><input id="al-i" autocomplete="username"><label>Password</label><input id="al-p" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')adLogin()">
+    <div class="err" id="al-e"></div><p class="hint">Prototype login: admin / admin123</p><div class="spacer"></div><button class="btn" onclick="adLogin()" style="margin-top:20px">Log in</button></section>
+  <section class="screen" id="hl"><div class="hdr"><button class="back" onclick="go('welcome')" aria-label="Back">&lsaquo;</button><div><h1>Host login</h1><p>For trip hosts</p></div></div>
+    <label>Host ID</label><input id="hl-i" autocomplete="username"><label>Password</label><input id="hl-p" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')hostLogin()">
+    <div class="err" id="hl-e"></div><p class="hint">Prototype login: host / host123</p><div class="spacer"></div><button class="btn" onclick="hostLogin()" style="margin-top:20px">Log in</button></section>
+  <section class="screen lt" id="ad"></section>
+  <section class="screen lt" id="hp"></section>
+  <section class="screen lt" id="nt"></section>
+    <section class="screen" id="kr"></section>
+  <div class="ov" id="nf" onclick="if(event.target===this)nfClose()"><div class="sheet pps" id="nfs"></div></div>
+    <section class="screen" id="vm"></section>
+  <section class="screen" id="vmo"></section>
+  <section class="screen" id="vmc"></section>
+  <div class="ov" id="vpo" onclick="if(event.target===this)vpClose()"><div class="sheet pps" id="vpos"></div></div>
+  <div id="svw"></div>
+  <div class="toast" id="toast"></div>
+  <div class="ov" id="ov"><div class="sheet"><h2 id="ov-t" style="font-size:20px"></h2><p id="ov-p"></p><div class="mrow"><button class="btn" id="ov-no" style="background:rgba(255,255,255,.1)">Close</button><button class="btn" id="ov-ok">OK</button></div></div></div>
+</div>
+
+<script>
+// Put your intro video file URL here (mp4). Leave empty to use the placeholder animation.
+const INTRO_SRC = "assets/asset08.mp4";
+const $ = id => document.getElementById(id);
+const ver = {mob:false, eml:false};
+let timer;
+function go(id){
+  clearTimeout(timer);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $(id).classList.add('on');$('app').dataset.s=id;if(id==='welcome')meStu=null;if(id==='home'){['kvid','avid'].forEach(k=>{const v=$(k);if(v&&v.play)v.play().catch(()=>{})})}
+}
+function startIntro(){
+  if(INTRO_SRC){
+    const v=$('vid'); v.src=INTRO_SRC; $('pulse').style.display='none';
+    v.play().catch(()=>{}); v.onended=()=>go('welcome'); v.onerror=()=>go('welcome');
+  } else { timer=setTimeout(()=>go('welcome'),3000); }
+}
+function sendOtp(k){
+  const val=$(k).value.trim();
+  if(k==='mob' && !/^\d{10}$/.test(val)) return alert('Enter a valid 10-digit mobile number.');
+  if(k==='eml' && !/^\S+@\S+\.\S+$/.test(val)) return alert('Enter a valid email address.');
+  $(k+'-o').classList.add('on'); $(k+'-c').focus();
+}
+function verify(k){
+  const c=$(k+'-c');
+  if(/^\d{4}$/.test(c.value)){ver[k]=true;$(k+'-ok').classList.add('on');$(k+'-o').classList.remove('on');chk();}
+}
+function chk(){
+  const ok = $('name').value.trim() && ver.mob && ver.eml && $('col').value.trim() && $('yr').value && $('cid').value.trim() && +$('age').value>=16;
+  $('signBtn').disabled=!ok;
+}
+function pick(el){
+  document.querySelectorAll('.city').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel'); city=el.textContent.trim(); $('cityBtn').disabled=false;
+}
+function reveal(){
+  const l=$('logo'),v=$('veil');
+  if(!regStudent())return;
+  go('home');
+  l.classList.remove('head');l.style.transition='opacity .5s ease';
+  v.style.transition='none';v.style.display='block';v.style.opacity='1';void v.offsetWidth;
+  l.classList.add('show');
+  setTimeout(()=>{l.style.transition='';l.classList.add('head');v.style.transition='opacity 1.1s ease';v.style.opacity='0'},900);
+  setTimeout(()=>{v.style.display='none'},2200);
+  if(vmJoin==='yes'&&!vmMe())setTimeout(()=>{vmFromSignup=true;vmStartOnboard(false)},2700);
+}
+
+/* ---------- Upcoming trips ---------- */
+let city='';
+const CITIES=['Hyderabad','Vijayawada','Visakhapatnam','Madikeri'];
+const IMG={araku:'assets/asset09.jpg',manali:'assets/asset03.jpg'};
+const TRIPS=[
+{id:1,t:'Araku & Vanjangi',sub:'2 nights / 3 days travel itinerary',m:'November',when:'November 2026',c:['Visakhapatnam','Hyderabad'],dur:'2 nights, 3 days',p:7499,pre:1999,img:IMG.araku,
+ days:[{h:'Day 1: Vizag to Araku Valley',s:'Scenic journey through the Eastern Ghats',i:['Pickup from Vizag','Borra Caves','Katiki Waterfalls (jeep ride included)','Coffee plants and plantations','Galikonda Viewpoint','Hilltop Church','Wooden Bridge','Pets and Wings (added attraction)'],n:'Night stay: Araku Valley'},
+ {h:'Day 2: Explore Araku Valley',s:'Gardens, tribal culture and coffee heritage',i:['Padmapuram Gardens','Chocolate Factory','Tribal Museum','Coffee Factory / Museum','Araku Pineapple Gardens','Chaparai Waterfalls'],n:'Night stay: Vanjangi. Prepare for the next morning\u2019s sunrise.'},
+ {h:'Day 3: Vanjangi sunrise and return to Vizag',s:'Sunrise, temple visit and the journey home',i:['Early-morning Vanjangi Sunrise Viewpoint','Jeep ride to the sunrise viewpoint (included)','Modhakondamma Temple','Return to Vizag by afternoon']}],
+ sig:'The early-morning sunrise viewpoint, with the jeep ride included in the package, is the signature experience of this trip.',
+ stay:['Night 1: Aaradhya Hotel, Araku Valley','Night 2: Nirvana Resorts, Paderu (near Vanjangi)','Deluxe AC rooms, included in the package'],
+ meals:[['Breakfast','Dosa, Idly','Mysore Bajji, Idly','Set Dosa, Idly'],['Dinner','Veg Biryani, Pulka, Andhra Chicken Curry, Rice, Dal, Sambar, Curd, Pickle','Chicken Biryani, Cashew Paneer Curry, Pulka','\u2014']],
+ inc:['Accommodation','Local transportation','Jeep rides for Katiki Waterfalls and Vanjangi Sunrise Viewpoint','Train tickets to and from Hyderabad','Photography and videography','Breakfast on all three days','Dinner on Days 1 and 2'],
+ exc:['Lunch (not included on any day)','Any expenses or services not specifically mentioned in the inclusions']},
+{id:2,t:'Podam Manali',m:'December',when:'December 2026',c:['Hyderabad','Vijayawada','Visakhapatnam','Madikeri'],img:IMG.manali,soon:true,sub:'Experience snowfall this December',tagline:'StudentDays Originals'}
+];
+let mon='All',cur=null,qty=1,bookings=[],mytab='upcoming';
+const money=n=>'\u20B9'+Number(n).toLocaleString('en-IN');
+const tr=id=>TRIPS.find(x=>x.id===id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200)}
+function sheet(title,msg,okLabel,cb){$('ov-t').textContent=title;$('ov-p').textContent=msg;$('ov-ok').textContent=okLabel||'OK';$('ov').classList.add('on');
+  $('ov-no').onclick=()=>$('ov').classList.remove('on');$('ov-ok').onclick=()=>{$('ov').classList.remove('on');cb&&cb()}}
+function openTrips(){
+  const f=$('cityf');f.innerHTML='<option value="All">All cities</option>'+CITIES.map(c=>'<option>'+c+'</option>').join('');
+  f.value=CITIES.includes(city)?city:'All';
+  $('chips').innerHTML=['All','November','December'].map(x=>'<button class="chip'+(x===mon?' on':'')+'" onclick="setMon(\''+x+'\')">'+x+'</button>').join('');
+  seg('ex');renderTrips();go('trips');
+}
+function setMon(x){mon=x;document.querySelectorAll('#chips .chip').forEach(c=>c.classList.toggle('on',c.textContent===x));renderTrips()}
+function seg(k){$('sg-ex').classList.toggle('on',k==='ex');$('sg-my').classList.toggle('on',k==='my');
+  $('ex-view').style.display=k==='ex'?'block':'none';$('my-view').style.display=k==='my'?'block':'none';if(k==='my')renderMy()}
+function renderTrips(){
+  const c=$('cityf').value;
+  const l=TRIPS.filter(t=>(c==='All'||t.c.includes(c))&&(mon==='All'||t.m===mon));
+  $('tlist').innerHTML=l.length?l.map(t=>'<div class="tcard" onclick="openTrip('+t.id+')"><div class="pst" style="background-image:url('+t.img+')"><span class="pill p1">'+t.when+'</span>'+(t.soon?'<span class="pill p2">Coming soon</span>':'<span class="pill p2">'+t.dur+'</span>')+'<div class="pg"></div></div><div class="tb"><b>'+t.t+'</b><div class="m">'+t.sub+'</div><div class="pr"><div>'+(t.soon?'<small>Details and price announced soon</small>':'<strong>'+money(t.p)+'</strong> <small>per student</small>')+'</div><span class="lnk" style="margin:0">View</span></div></div></div>').join(''):'<div class="empty">No trips match these filters yet.<br>Try another city or month.</div>';
+}
+const ul=(a,c)=>'<ul class="'+(c||'')+'">'+a.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+function openTrip(id){
+  const t=tr(id);cur=t;qty=1;let b='';
+  if(t.soon){
+    b='<div class="dsec"><h3>What to expect</h3><div class="day"><b>Experience snowfall in Manali</b>Itinerary, price, stay and booking details will be announced soon.</div></div><div class="bar"><div><strong>'+t.when+'</strong><small>Booking opens soon</small></div><button class="btn" onclick="toast(\'We will notify you when booking opens\')">Notify me</button></div>';
+  } else {
+    b='<div class="dsec"><h3>Price</h3><div class="pb"><div>Package price<b>'+money(t.p)+'</b></div><div>Pre-booking<b>'+money(t.pre)+'</b></div><div>Balance<b>'+money(t.p-t.pre)+'</b></div></div><p class="hint">The pre-booking amount is deducted from the package price. Pay the balance shortly before the trip starts.</p></div>'
+    +'<div class="dsec"><h3>Itinerary</h3>'+t.days.map(d=>'<div class="day"><b>'+d.h+'</b><span style="color:#9a9a9a;font-size:12px">'+d.s+'</span><ul style="margin-top:8px">'+d.i.map(x=>'<li>'+x+'</li>').join('')+'</ul>'+(d.n?'<div class="night">'+d.n+'</div>':'')+'</div>').join('')+'<div class="sig"><small style="color:#9cc6ff">Signature experience</small><b>Vanjangi sunrise</b><span style="font-size:13px;color:#ddd">'+t.sig+'</span></div></div>'
+    +'<div class="dsec"><h3>Where you\u2019ll stay</h3><ul class="pl">'+t.stay.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>'
+    +'<div class="dsec"><h3>Meal plan</h3><div style="overflow-x:auto"><table class="mt"><tr><th></th><th>Day 1</th><th>Day 2</th><th>Day 3</th></tr>'+t.meals.map(r=>'<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+'</td></tr>').join('')+'</table></div></div>'
+    +'<div class="dsec"><h3>Package inclusions</h3>'+ul(t.inc,'ok2')+'</div><div class="dsec"><h3>Package exclusions</h3>'+ul(t.exc,'no2')+'</div>'
+    +'<div class="dsec"><h3>How it works</h3><div class="day"><b>1. Pre-book your seat</b>Pay '+money(t.pre)+' to reserve your place.</div><div class="day"><b>2. Pre-booking is adjusted</b>'+money(t.pre)+' is deducted from the package price of '+money(t.p)+'.</div><div class="day"><b>3. Pay the balance before the trip</b>The remaining '+money(t.p-t.pre)+' is paid shortly before the trip starts.</div><a class="lnk" onclick="policy()">Read Refund and Cancellation Policy</a></div>'
+    +'<div class="bar"><div><strong>'+money(t.pre)+'</strong><small>to pre-book</small></div><button class="btn" onclick="startBook()">Pre-book now</button></div>';
+  }
+  $('tdetail').innerHTML='<div class="dh2" style="background-image:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.1) 40%,rgba(5,5,5,.95)),url('+t.img+')"><button class="back" onclick="go(\'trips\')">&lsaquo;</button><div><span class="pill">'+t.when+'</span><h1 style="margin-top:10px">'+t.t+'</h1><div style="color:#ddd;font-size:14px;margin-top:4px">'+t.sub+'</div></div></div>'+b;
+  go('tdetail');$('tdetail').scrollTop=0;
+}
+function policy(){sheet('Refund and Cancellation Policy','The full policy will open here once the official text is added.','Got it')}
+function startBook(){
+  qty=1;
+  $('book').innerHTML='<div class="hdr"><button class="back" onclick="go(\'tdetail\')">&lsaquo;</button><div><h1>Pre-book your seat</h1><p>'+cur.t+' \u2022 '+cur.when+'</p></div></div>'
+  +'<label>Travellers</label><div class="stp"><span>Students</span><div><button onclick="step(-1)">\u2212</button><span id="q">1</span><button onclick="step(1)">+</button></div></div>'
+  +'<label>Student verification</label><input id="bvid" placeholder="Passport ID or College ID number">'
+  +'<label>Emergency contact</label><input id="en" placeholder="Contact name" style="margin-bottom:8px"><input id="ep" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number">'
+  +'<label>Price details</label><div class="bd" id="bd"></div>'
+  +'<label>Payment method</label><div id="pm"><div class="opt on" onclick="pmSel(this)">UPI</div><div class="opt" onclick="pmSel(this)">Credit or debit card</div><div class="opt" onclick="pmSel(this)">Net banking</div></div>'
+  +'<label class="chk"><input type="checkbox" id="ra"><span>I accept the <a class="lnk" style="margin:0" onclick="policy()">Refund and Cancellation Policy</a>.</span></label><div class="err" id="err"></div>'
+  +'<div class="bar"><div><strong id="tot"></strong><small>Pay now</small></div><button class="btn" onclick="pay()">Pay now</button></div>';
+  price();go('book');$('book').scrollTop=0;
+}
+function step(d){qty=Math.max(1,Math.min(6,qty+d));$('q').textContent=qty;price()}
+function price(){const n=qty,pk=cur.p*n,pre=cur.pre*n;$('bd').innerHTML='<p><span>Package price ('+money(cur.p)+' \u00D7 '+n+')</span><span>'+money(pk)+'</span></p><p><span>Pre-booking due now</span><span>'+money(pre)+'</span></p><p class="t"><span>Balance before the trip</span><span>'+money(pk-pre)+'</span></p>';$('tot').textContent=money(pre)}
+function pmSel(el){document.querySelectorAll('#pm .opt').forEach(o=>o.classList.remove('on'));el.classList.add('on')}
+function pay(){
+  const e=m=>{$('err').textContent=m;return false};
+  if($('bvid').value.trim().length<4)return e('Enter your Passport ID or College ID.');
+  if(!$('en').value.trim())return e('Enter an emergency contact name.');
+  if(!/^\d{10}$/.test($('ep').value))return e('Enter a valid 10-digit emergency number.');
+  if(!$('ra').checked)return e('Accept the Refund and Cancellation Policy to continue.');
+  const btn=document.querySelector('#book .bar .btn');btn.disabled=true;btn.textContent='Processing\u2026';
+  payNow({item:cur.id,qty,desc:cur.t+' pre-booking',name:meStu&&meStu.name,mobile:meStu&&meStu.mobile}).then(r=>{
+    btn.disabled=false;btn.textContent='Pay now';
+    if(!r.ok)return e(r.msg||'Payment failed. Nothing was charged.');
+    const b={id:'SD'+Date.now().toString().slice(-7),tid:cur.id,n:qty,paid:cur.pre*qty,bal:(cur.p-cur.pre)*qty,st:'upcoming',sid:meStu&&meStu.id,who:meStu?meStu.name:'Guest',t:Date.now(),payId:r.paymentId||null,orderId:r.orderId||null,demo:!!r.demo};
+    bookings.unshift(b);if(r.demo)toast('Demo payment. Razorpay is not connected.');showDone(b);
+  });
+}
+function qr(seed){
+  let s=0;for(const ch of seed)s=(s*31+ch.charCodeAt(0))>>>0;const N=21,u=7;let r='';
+  const fin=(x,y)=>{for(let i=0;i<7;i++)for(let j=0;j<7;j++){const on=i===0||j===0||i===6||j===6||(i>1&&i<5&&j>1&&j<5);if(on)r+='<rect x="'+((x+i)*u)+'" y="'+((y+j)*u)+'" width="7" height="7"/>'}};
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){if((x<8&&y<8)||(x>12&&y<8)||(x<8&&y>12))continue;s=(s*1664525+1013904223)>>>0;if(s>>>29&1)r+='<rect x="'+x*u+'" y="'+y*u+'" width="7" height="7"/>'}
+  fin(0,0);fin(14,0);fin(0,14);
+  return '<svg width="170" height="170" viewBox="0 0 147 147" fill="#000">'+r+'</svg>';
+}
+function showDone(b){
+  const t=tr(b.tid);
+  $('done').innerHTML='<div class="hdr"><div><h1>Seat pre-booked</h1><p>Show this ticket at the pickup point</p></div></div><div class="tk"><b style="font-size:18px">'+t.t+'</b><div style="color:#bbb;font-size:13px;margin-top:4px">'+t.when+' \u2022 '+b.n+' student'+(b.n>1?'s':'')+'</div>'+qr(b.id)+'<br><code>'+b.id+'</code><div style="color:#bbb;font-size:13px;margin-top:12px">Paid '+money(b.paid)+' \u2022 Balance '+money(b.bal)+' due before the trip</div></div>'
+  +'<div class="mrow"><button class="btn" onclick="toast(\'Receipt saved (demo)\')">Download receipt</button></div><div class="spacer"></div>'
+  +'<button class="btn" onclick="mytab=\'upcoming\';openTrips();seg(\'my\')" style="margin-top:20px">View my trips</button>';
+  go('done');
+}
+function renderMy(){
+  $('mychips').innerHTML=['upcoming','completed','cancelled'].map(x=>'<button class="chip'+(x===mytab?' on':'')+'" onclick="mytab=\''+x+'\';renderMy()">'+x[0].toUpperCase()+x.slice(1)+'</button>').join('');
+  const l=bookings.filter(b=>b.st===mytab&&(!meStu||b.sid===meStu.id));
+  $('mlist').innerHTML=l.length?l.map(b=>{const t=tr(b.tid);return '<div class="tcard"><div class="tb"><div style="display:flex;justify-content:space-between;align-items:center"><b>'+t.t+'</b><span class="st '+b.st+'">'+b.st+'</span></div><div class="m">'+t.when+' \u2022 '+b.n+' student'+(b.n>1?'s':'')+'</div><div class="m">Paid '+money(b.paid)+' \u2022 Balance '+money(b.bal)+'</div><div class="m">Booking '+b.id+'</div>'
+   +'<div class="mrow">'+(b.st==='upcoming'?'<button class="btn" onclick="showDone(bookings.find(x=>x.id===\''+b.id+'\'))">Ticket</button><button class="btn" onclick="cancelB(\''+b.id+'\')">Cancel</button>':'')+'<button class="btn" onclick="toast(\'Receipt saved (demo)\')">Receipt</button></div></div></div>'}).join(''):'<div class="empty">No '+mytab+' trips.<br>Explore upcoming trips to pre-book your seat.</div>';
+}
+function cancelB(id){
+  const b=bookings.find(x=>x.id===id);
+  sheet('Cancel this booking?','Any refund follows the official Refund and Cancellation Policy, which hasn\u2019t been added yet. Our team will confirm the refund.','Cancel booking',()=>{b.st='cancelled';renderMy();toast('Booking cancelled')});
+}
+
+/* ---------- shared helpers ---------- */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function cp(t){try{await navigator.clipboard.writeText(t);toast('Link copied')}catch(e){toast(t)}}
+async function shr(t){if(navigator.share){try{await navigator.share({title:'Student Days',url:t})}catch(e){}}else cp(t)}
+let ACT=[];
+function actions(title,items){
+  $('ov2s').innerHTML='<h2 style="font-size:19px;margin-bottom:12px">'+title+'</h2>'+items.map((x,i)=>'<button class="btn" style="width:100%;margin-bottom:8px;'+(x[2]?'background:linear-gradient(180deg,rgba(255,90,80,.7),rgba(200,40,30,.5))':'')+'" onclick="act('+i+')">'+x[0]+'</button>').join('')+'<button class="btn" style="width:100%;background:rgba(255,255,255,.1)" onclick="$(\'ov2\').classList.remove(\'on\')">Cancel</button>';
+  ACT=items;$('ov2').classList.add('on');
+}
+function act(i){$('ov2').classList.remove('on');ACT[i][1]()}
+const dfmt=s=>s?new Date(s+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'';
+
+/* ---------- Create private trip ---------- */
+let pts=[],pf=null,ptTab='new';
+const newPF=()=>({id:null,dest:'',s:'',e:'',n:4,bud:'',tr:'',stay:'',fr:[],code:'PT'+Math.random().toString(36).slice(2,8).toUpperCase()});
+const PTS=['draft','quote requested','confirmed'];
+function openPT(){pf=pf||newPF();ptSeg(ptTab);go('pt')}
+function ptSeg(k){
+  ptTab=k;$('pt-new').classList.toggle('on',k==='new');$('pt-my').classList.toggle('on',k==='my');
+  $('ptf').style.display=k==='new'?'block':'none';$('ptl').style.display=k==='my'?'block':'none';
+  if(k==='new'){pf=pf||newPF();ptRender()}else ptList();
+}
+function pg(d){pf.n=Math.max(1,Math.min(50,pf.n+d));ptRender()}
+function ptRender(){
+  const o=(a,k)=>a.map(x=>'<button class="chip'+(pf[k]===x?' on':'')+'" onclick="pf.'+k+'=\''+x+'\';ptRender()">'+x+'</button>').join('');
+  const link='https://studentdays.co/trip/'+pf.code;
+  $('ptf').innerHTML=
+  '<label>Destination</label><input value="'+esc(pf.dest)+'" placeholder="Where do you want to go?" oninput="pf.dest=this.value">'
+  +'<div class="row"><div><label>Start date</label><input type="date" value="'+pf.s+'" onchange="pf.s=this.value"></div><div><label>End date</label><input type="date" value="'+pf.e+'" onchange="pf.e=this.value"></div></div>'
+  +'<label>Group size</label><div class="stp"><span>Students</span><div><button onclick="pg(-1)">\u2212</button><span>'+pf.n+'</span><button onclick="pg(1)">+</button></div></div>'
+  +'<label>Budget per person</label><select value="'+pf.bud+'" onchange="pf.bud=this.value"><option value="">Select budget</option>'+['Under \u20B93,000','\u20B93,000 to \u20B96,000','\u20B96,000 to \u20B910,000','Above \u20B910,000'].map(x=>'<option'+(pf.bud===x?' selected':'')+'>'+x+'</option>').join('')+'</select>'
+  +'<label>Transport</label><div class="chips">'+o(['Bus','Train','Flight','Own vehicle'],'tr')+'</div>'
+  +'<label>Stay</label><div class="chips">'+o(['Hostel','Hotel','Resort','Camping'],'stay')+'</div>'
+  +'<label>Add friends</label><div class="row"><input id="p-f" placeholder="Phone number or email"><button class="btn-s" onclick="addF()">Add</button></div>'
+  +'<div class="chips" style="flex-wrap:wrap">'+pf.fr.map((x,i)=>'<button class="chip on" onclick="pf.fr.splice('+i+',1);ptRender()">'+esc(x)+' \u2715</button>').join('')+'</div>'
+  +'<button class="btn-s" style="width:100%;height:46px;margin-top:4px" onclick="ptContacts()">Add from contacts</button>'
+  +'<div class="bd" style="margin-top:12px"><p><span>Invite link</span></p><code style="word-break:break-all;font-size:13px;color:#9cc6ff">'+link+'</code><div class="mrow"><button class="btn" onclick="cp(\''+link+'\')">Copy link</button><button class="btn" onclick="shr(\''+link+'\')">Share</button></div></div>'
+  +'<div class="mrow" style="margin-top:20px"><button class="btn" style="background:rgba(255,255,255,.1)" onclick="ptSave(\'draft\')">Save draft</button><button class="btn" onclick="ptSave(\'quote requested\')">Request quote</button></div>';
+}
+function addF(){const v=$('p-f').value.trim();if(!/^\d{10}$/.test(v)&&!/^\S+@\S+\.\S+$/.test(v))return toast('Enter a 10-digit number or a valid email');if(pf.fr.includes(v))return toast('Already added');pf.fr.push(v);ptRender()}
+function ptContacts(){
+  if(navigator.contacts&&navigator.contacts.select){navigator.contacts.select(['name','tel'],{multiple:true}).then(r=>{r.forEach(c=>pf.fr.push((c.name&&c.name[0])||(c.tel&&c.tel[0])||'Friend'));ptRender()}).catch(()=>{})}
+  else sheet('Contacts not available here','The app asks for contacts permission on your phone. For now, add a phone number or email above.','OK');
+}
+function ptSave(st){
+  if(!pf.dest.trim())return toast('Enter a destination');
+  if(st==='quote requested'){
+    if(!pf.s||!pf.e)return toast('Choose start and end dates');
+    if(pf.e<pf.s)return toast('End date is before start date');
+    if(!pf.bud||!pf.tr||!pf.stay)return toast('Choose budget, transport and stay');
+  }
+  const o=JSON.parse(JSON.stringify(pf));o.st=st;o.who=meStu?meStu.name:'Guest';o.sid=meStu&&meStu.id;
+  if(o.id)pts=pts.map(x=>x.id===o.id?o:x);else{o.id=Date.now();pts.unshift(o)}
+  pf=null;toast(st==='draft'?'Draft saved':'Quote requested');ptSeg('my');
+}
+function ptList(){
+  const mine=pts.filter(x=>!meStu||x.sid===meStu.id);$('ptl').innerHTML=mine.length?mine.map(p=>{const i=PTS.indexOf(p.st);
+    return '<div class="tcard"><div class="tb"><div class="rt"><b>'+esc(p.dest)+'</b><span class="st '+(p.st==='confirmed'?'completed':'upcoming')+'">'+p.st+'</span></div>'
+    +'<div class="m">'+(p.s?dfmt(p.s)+' \u2013 '+dfmt(p.e)+' \u2022 ':'')+p.n+' students'+(p.bud?' \u2022 '+p.bud:'')+'</div><div class="m">'+[p.tr,p.stay].filter(Boolean).join(' \u2022 ')+(p.fr.length?' \u2022 '+p.fr.length+' friend'+(p.fr.length>1?'s':'')+' invited':'')+'</div>'
+    +'<div class="sp3"><span class="on"></span><i class="'+(i>0?'on':'')+'"></i><span class="'+(i>0?'on':'')+'"></span><i class="'+(i>1?'on':'')+'"></i><span class="'+(i>1?'on':'')+'"></span></div><div class="sl"><span>Draft</span><span>Quote requested</span><span>Confirmed</span></div>'
+    +(p.st==='draft'?'<div class="mrow"><button class="btn" style="background:rgba(255,255,255,.1)" onclick="ptEdit('+p.id+')">Edit</button><button class="btn" onclick="ptSend('+p.id+')">Request quote</button></div>':'')
+    +(p.st==='quote requested'?'<p class="hint">Our team will send your quote soon.</p><a class="lnk" onclick="ptConfirm('+p.id+')">Demo only: mark as confirmed</a>':'')
+    +(p.st==='confirmed'?'<p class="hint">Confirmed. Our team will contact you with the final plan.</p>':'')
+    +'</div></div>'}).join(''):'<div class="empty">No private trips yet.<br>Plan one and request a quote.</div>';
+}
+function ptEdit(id){pf=JSON.parse(JSON.stringify(pts.find(x=>x.id===id)));ptSeg('new')}
+function ptSend(id){const p=pts.find(x=>x.id===id);if(!p.s||!p.e||!p.bud||!p.tr||!p.stay){toast('Add dates, budget, transport and stay first');return ptEdit(id)}p.st='quote requested';toast('Quote requested');ptList()}
+function ptConfirm(id){pts.find(x=>x.id===id).st='confirmed';ptList()}
+
+/* ---------- Anonymous chat ---------- */
+const AV=['\uD83E\uDD8A','\uD83D\uDC3C','\uD83E\uDD84','\uD83D\uDC2F','\uD83D\uDC38','\uD83E\uDD89','\uD83D\uDC19','\uD83E\uDD8B','\uD83D\uDC28','\uD83D\uDC27','\uD83E\uDD96','\uD83D\uDC33'];
+const AD=['Blue','Sunny','Quiet','Brave','Cosmic','Lucky','Misty','Neon'],AN=['Fox','Otter','Panda','Owl','Koala','Falcon','Tiger','Dolphin'];
+const rh=()=>AD[Math.floor(Math.random()*8)]+AN[Math.floor(Math.random()*8)]+(10+Math.floor(Math.random()*90));
+const BAD=/\b(fuck|shit|bitch|asshole|bastard|slut|dick|cunt)\w*|madarchod|bhenchod|chutiya/i;
+const PII=/(\+?\d[\d\s-]{8,}\d)|[\w.+-]+@[\w-]+\.\w+/;
+const LANGS=['English','Telugu','Hindi','Kannada','Tamil','Malayalam'];
+const mk=(h,a,t)=>({h,a,t});
+let rooms=[
+ {id:'r1',n:'Hyderabad hangout',l:'Telugu + English',k:'City',m:128,msgs:[mk('SunnyOtter21','\uD83E\uDD9D','Anyone up for a weekend plan?'),mk('MistyFalcon57','\uD83E\uDD85','Count me in!')]},
+ {id:'r2',n:'Araku & Vanjangi crew',l:'English',k:'Trip',m:46,msgs:[mk('CosmicPanda33','\uD83D\uDC3C','Which train are we taking from Hyderabad?')]},
+ {id:'r3',n:'Music and memes',l:'Hindi + English',k:'Interest',m:212,msgs:[mk('LuckyKoala64','\uD83D\uDC28','Drop your study playlist')]},
+ {id:'r4',n:'Vizag vibes',l:'Telugu',k:'City',m:64,msgs:[mk('BraveTiger18','\uD83D\uDC2F','Best beach spot for a sunset?')]},
+ {id:'r5',n:'Manali snowfall squad',l:'English',k:'Trip',m:31,msgs:[mk('NeonDolphin42','\uD83D\uDC33','December cannot come sooner')]}];
+let me=null,su=null,myRooms=[],reqs=[],blocked=new Set(),muted=new Set(),modQ=[],strikes=0,banned=false,chat=null,stamps=[],rtab='rooms',rk='All',cr=null;
+function openChat(){me?acRooms():acSetup()}
+const RULES='\u2022 Be respectful. No hate, bullying, threats or harassment.\n\u2022 Never share your real name, college, phone number, email or social handles.\n\u2022 No sexual, violent or illegal content.\n\u2022 Report anything unsafe. Use Help in an emergency.\n\u2022 Repeated violations lead to a ban.\n\u2022 Chats are stored and may be reviewed by Student Days admins to investigate abuse.';
+function conductSheet(){sheet('Code of conduct',RULES,'Got it')}
+function acSetup(){
+  su=su||{h:rh(),a:AV[0],ok:false};
+  $('ac1').innerHTML='<div class="hdr"><button class="back" onclick="go(\'home\')">&lsaquo;</button><div><h1>Anonymous chat</h1><p>Verified students only \u2713</p></div></div>'
+  +'<div style="text-align:center;font-size:64px;margin:4px 0">'+su.a+'</div>'
+  +'<label>Anonymous name</label><div class="row"><input value="'+esc(su.h)+'" maxlength="16" oninput="su.h=this.value"><button class="btn-s" onclick="su.h=rh();acSetup()">Randomize</button></div>'
+  +'<label>Choose avatar</label><div class="avs">'+AV.map(x=>'<button class="av-b'+(x===su.a?' on':'')+'" onclick="su.a=\''+x+'\';acSetup()">'+x+'</button>').join('')+'</div>'
+  +'<div class="note"><b>Your identity stays hidden.</b> Other students never see your real name, college or phone number. Don\u2019t use your real name here.</div>'
+  +'<div class="note"><b>Code of conduct</b><br>'+RULES.replace(/\n/g,'<br>')+'</div>'
+  +'<label class="chk"><input type="checkbox" '+(su.ok?'checked':'')+' onchange="su.ok=this.checked"><span>I have read and agree to the code of conduct.</span></label>'
+  +'<div class="spacer"></div><button class="btn" onclick="acGo()" style="margin-top:20px">Enter vibe rooms</button>';
+  go('ac1');
+}
+function acGo(){
+  const n=su.h.trim();
+  if(!/^[A-Za-z0-9_]{3,16}$/.test(n))return toast('Use 3 to 16 letters, numbers or underscores');
+  if(BAD.test(n))return toast('Choose a respectful name');
+  if(!su.ok)return toast('Agree to the code of conduct to continue');
+  me={h:n,a:su.a};acRooms();
+}
+function acRooms(){
+  const l=rooms.filter(r=>rk==='All'||r.k===rk),pend=myRooms.filter(r=>r.st==='pending');
+  let b='';
+  if(rtab==='rooms'){
+    b='<div class="chips">'+['All','City','Trip','Interest'].map(x=>'<button class="chip'+(x===rk?' on':'')+'" onclick="rk=\''+x+'\';acRooms()">'+x+'</button>').join('')+'</div>'
+    +pend.map(r=>'<div class="tcard"><div class="tb"><div class="rt"><b>'+esc(r.n)+'</b><span class="st upcoming">Pending approval</span></div><div class="m">'+r.l+' \u2022 '+r.k+'</div><div class="m" style="word-break:break-all">https://studentdays.co/vibe/'+r.code+'</div><a class="lnk" onclick="crApprove(\''+r.id+'\')">Demo only: approve this room</a></div></div>').join('')
+    +l.map(r=>'<div class="tcard" onclick="enterRoom(\''+r.id+'\')"><div class="tb"><div class="rt"><b>'+esc(r.n)+'</b><span class="st upcoming">'+r.k+'</span></div><div class="m">'+r.l+' \u2022 '+r.m+' online</div></div></div>').join('')
+    +'<p class="hint">Sample rooms for preview.</p>';
+  } else {
+    b=reqs.length?reqs.map((r,i)=>'<div class="tcard"><div class="tb"><div class="rt"><b>'+r.a+' '+esc(r.h)+'</b><span class="st '+(r.st==='accepted'?'completed':'upcoming')+'">'+r.st+'</span></div>'+(r.st==='accepted'?'<div class="mrow"><button class="btn" onclick="openDM('+i+')">Open chat</button></div>':'<div class="m">Waiting for them to accept</div>')+'</div></div>').join(''):'<div class="empty">No chat requests yet.<br>Tap a name inside a room to send one.</div>';
+  }
+  $('ac2').innerHTML='<div class="hdr"><button class="back" onclick="go(\'home\')">&lsaquo;</button><div style="flex:1;min-width:0"><h1 style="font-size:22px">Vibe rooms</h1><p>'+me.a+' '+esc(me.h)+'</p></div><button class="btn-s" style="font-size:12px;padding:10px 12px;height:auto" onclick="crOpen()">Create Vibe Room</button></div>'
+  +'<div class="ch"><button class="chip" onclick="acHelp()">\uD83C\uDD98 Help</button><button class="chip" onclick="conductSheet()">Code of conduct</button></div>'
+  +'<div class="seg"><button class="'+(rtab==='rooms'?'on':'')+'" onclick="rtab=\'rooms\';acRooms()">Rooms</button><button class="'+(rtab==='req'?'on':'')+'" onclick="rtab=\'req\';acRooms()">Requests</button></div>'+b
+  +'<p class="hint" style="margin-top:12px">Chats are stored and may be reviewed by Student Days admins to investigate abuse.</p>';
+  go('ac2');
+}
+function crOpen(){cr={n:'',l:'English',k:'Interest',done:null};crRender();go('acr')}
+function crRender(){
+  if(cr.done){const lk='https://studentdays.co/vibe/'+cr.done.code;
+    $('acr').innerHTML='<div class="hdr"><div><h1>Room submitted</h1><p>Waiting for admin approval</p></div></div><div class="tk"><div style="font-size:42px">\u2705</div><b style="font-size:18px">'+esc(cr.done.n)+'</b><div style="color:#bbb;font-size:13px;margin:6px 0 12px">'+cr.done.l+' \u2022 '+cr.done.k+'</div><code style="word-break:break-all;font-size:13px;color:#9cc6ff">'+lk+'</code><div class="mrow"><button class="btn" onclick="cp(\''+lk+'\')">Copy link</button><button class="btn" onclick="shr(\''+lk+'\')">Share</button></div></div><p class="hint">Invite friends with this link. After approval your room appears in Vibe rooms.</p><div class="spacer"></div><button class="btn" style="margin-top:20px" onclick="acRooms()">Back to rooms</button>';return}
+  $('acr').innerHTML='<div class="hdr"><button class="back" onclick="acRooms()">&lsaquo;</button><div><h1>Create Vibe Room</h1><p>Rooms are reviewed before they go live</p></div></div>'
+  +'<label>Room name</label><input value="'+esc(cr.n)+'" maxlength="40" placeholder="e.g. Late night study club" oninput="cr.n=this.value">'
+  +'<label>Language</label><select onchange="cr.l=this.value">'+LANGS.map(x=>'<option'+(cr.l===x?' selected':'')+'>'+x+'</option>').join('')+'</select>'
+  +'<label>Room type</label><div class="chips">'+['City','Trip','Interest'].map(x=>'<button class="chip'+(cr.k===x?' on':'')+'" onclick="cr.k=\''+x+'\';crRender()">'+x+'</button>').join('')+'</div>'
+  +'<div class="spacer"></div><button class="btn" style="margin-top:20px" onclick="crSubmit()">Submit for approval</button>';
+}
+function crSubmit(){
+  const n=cr.n.trim();
+  if(n.length<3)return toast('Enter a room name (3 or more letters)');
+  if(BAD.test(n)||PII.test(n))return toast('Choose a respectful name without contact details');
+  const r={id:'m'+Date.now(),n,l:cr.l,k:cr.k,m:1,st:'pending',code:Math.random().toString(36).slice(2,8).toUpperCase(),msgs:[]};
+  myRooms.unshift(r);cr.done=r;crRender();
+}
+function crApprove(id){const r=myRooms.find(x=>x.id===id);r.st='approved';rooms.unshift(r);toast('Room approved and now visible');acRooms()}
+function enterRoom(id){const r=rooms.find(x=>x.id===id);chat={id,title:r.n,sub:r.l+' \u2022 '+r.m+' online',kind:'room',msgs:r.msgs};acChat()}
+function openDM(i){const r=reqs[i];chat={id:'d'+r.h,title:r.a+' '+r.h,sub:'Direct anonymous chat',kind:'dm',msgs:r.msgs,peer:r};acChat()}
+const bub=m=>m.me?'<div class="bw me"><div class="bb">'+esc(m.t)+'</div></div>':'<div class="bw"><div class="bav">'+m.a+'</div><div class="bb"><button class="bn" onclick="actUser(\''+m.h+'\',\''+m.a+'\')">'+esc(m.h)+'</button>'+esc(m.t)+'</div></div>';
+const vis=m=>m.me||!(blocked.has(m.h)||muted.has(m.h));
+function acChat(){
+  $('ac3').innerHTML='<div class="hdr" style="margin-bottom:8px"><button class="back" onclick="acRooms()">&lsaquo;</button><div style="flex:1;min-width:0"><h1 style="font-size:20px">'+esc(chat.title)+'</h1><p>'+chat.sub+'</p></div><button class="back" onclick="chatMenu()">\u22EF</button></div>'
+  +'<div class="msgs" id="ml">'+chat.msgs.filter(vis).map(bub).join('')+'</div>'
+  +(banned?'<div class="ban">You are muted from chat for repeated violations. Moderators may review this account.</div>':'<div class="cin"><input id="cm" maxlength="300" placeholder="Say something nice" onkeydown="if(event.key===\'Enter\')sendM()"><button class="btn-s" onclick="sendM()">Send</button></div>');
+  go('ac3');const ml=$('ml');ml.scrollTop=ml.scrollHeight;
+}
+function addMsg(m,c){c.msgs.push(m);if(chat===c&&vis(m)){const ml=$('ml');ml.insertAdjacentHTML('beforeend',bub(m));ml.scrollTop=ml.scrollHeight}}
+function sendM(){
+  const inp=$('cm');if(!inp)return;const t=inp.value.trim();if(!t||banned)return;
+  const now=Date.now();stamps=stamps.filter(x=>now-x<10000);
+  if(stamps.length>=5)return toast('Slow down. Try again in a few seconds.');
+  if(PII.test(t))return toast('Don\u2019t share phone numbers or email addresses');
+  if(BAD.test(t)){strikes++;if(strikes>=3){banned=true;modQ.push({h:me.h,reason:'auto-ban: repeated abusive language',t:now});acChat();return}
+    return toast('Message blocked. Keep it respectful (warning '+strikes+' of 3).')}
+  stamps.push(now);inp.value='';const c=chat;addMsg({h:me.h,a:me.a,t,me:true},c);
+  setTimeout(()=>{if(chat!==c)return;const peers=c.kind==='dm'?[{h:c.peer.h,a:c.peer.a}]:c.msgs.filter(m=>!m.me).map(m=>({h:m.h,a:m.a}));if(!peers.length)return;const p=peers[Math.floor(Math.random()*peers.length)];addMsg({h:p.h,a:p.a,t:['Haha same!','Tell me more','Nice, I am in','Good point']['0123'[Math.floor(Math.random()*4)]]},c)},1600);
+}
+function actUser(h,a){
+  actions(a+' '+h,[['Send chat request',()=>sendReq(h,a)],['Mute '+h,()=>{muted.add(h);acChat();toast('Muted '+h)}],['Block '+h,()=>{blocked.add(h);acChat();toast('Blocked '+h)}],['Report '+h,()=>reportU(h),true]]);
+}
+function reportU(h){actions('Report '+h,['Harassment or bullying','Hate or abuse','Sexual or inappropriate content','Sharing personal details','Something else'].map(x=>[x,()=>{modQ.push({h,reason:x,room:chat.title,t:Date.now()});toast('Reported. Moderators will review it.')}]))}
+function sendReq(h,a){
+  if(blocked.has(h))return toast('Unblock this user first');
+  if(reqs.find(r=>r.h===h))return toast('Request already sent');
+  const r={h,a,st:'pending',msgs:[]};reqs.push(r);toast('Chat request sent');
+  setTimeout(()=>{r.st='accepted';r.msgs.push({h,a,t:'Hey! Thanks for the request.'});toast(h+' accepted your chat request');if($('ac2').classList.contains('on'))acRooms()},3000);
+}
+function chatMenu(){actions('Chat options',[['Code of conduct',conductSheet],['Help and emergency',acHelp],['Leave chat',acRooms]])}
+function acHelp(){actions('Need help?',[['Call 112 (emergency services)',()=>{location.href='tel:112'},true],['Report a safety issue to Student Days',()=>{modQ.push({h:me.h,reason:'safety help request',t:Date.now()});toast('Safety report sent to our team')}],['Code of conduct',conductSheet]])}
+
+
+
+/* ---------- Student Passport page ---------- */
+/* ALL reward configuration lives here. null = not configured yet. */
+const PASS_CFG={
+  fee:99,oneTime:true,paymentEnabled:false,coinsPerTrip:null,
+  levels:[
+    {n:1,name:'Explorer',tone:'blue',tripsRequired:1,reward:{type:'discount',pct:10},text:'Your journey begins.',line:'Complete your first trip.',unlock:'10% off your next trip.'},
+    {n:2,name:'Silver',tone:'silver',tripsRequired:2,reward:{type:'discount',pct:20},text:'Keep exploring.',unlock:'20% off your next trip.'},
+    {n:3,name:'Gold',tone:'gold',tripsRequired:3,reward:{type:'discount',pct:30},text:'A true explorer.',unlock:'30% off your next trip.'},
+    {n:4,name:'Platinum',tone:'plat',tripsRequired:null,reward:{type:'complimentary'},text:'The ultimate milestone.',unlock:'Free trip eligibility*'}],
+  freq:['Once in a while','Every few months','Frequently','Whenever there\u2019s a great adventure'],
+  style:['Solo','With one friend','With a group of friends','Depends on the trip']
+};
+const DARKLOGO='assets/asset10.png',SPHERO='assets/asset11.jpg';
+const TERMS=[
+['1. Fee','\u20B999 one-time. No monthly or recurring charges. Refund rules follow the final published policy.'],
+['2. Personal','Linked to one student\u2019s account. Not transferable.'],
+['3. Your rewards','Discounts apply only to your own trip, not to friends or the group.'],
+['4. First-trip referral','Bring at least one friend on your first eligible trip to start reward progression. The friend must meet StudentDays.co\u2019s final booking rules.'],
+['5. Eligible trips','Only completed trips that meet the final rules count. Cancelled or refunded bookings may not qualify.'],
+['6. Progression','Each eligible trip moves you up: 10%, then +10% per milestone, per the final rules.'],
+['7. Using rewards','For future trips only. Not for past bookings, other people or the group.'],
+['8. Platinum','Free-trip eligibility, subject to final conditions, availability and exclusions.'],
+['9. Coins and levels','Based on verified activity. Final earning rules and thresholds will be published first.'],
+['10. Accurate details','Give true details. We may verify your student status.'],
+['11. Fair use','No transferring, duplicating or gaming rewards.'],
+['12. Changes','Changes will be communicated clearly and applied fairly under the law.']];
+const ICO={
+ join:'<circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7M19 8v6M16 11h6"/>',
+ trip:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+ up:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+ gift:'<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 13h18M12 8c-2-4-6-3-5 0 1 2 5 0 5 0zm0 0c2-4 6-3 5 0-1 2-5 0-5 0z"/>',
+ tag:'<path d="M3 12l9-9h9v9l-9 9z"/><circle cx="16.5" cy="7.5" r="1.3"/>',
+ plane:'<path d="M21 3L3 11l7 3 3 7z"/><path d="M10 14l11-11"/>',
+ star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+ pin:'<path d="M12 21s7-6 7-11a7 7 0 10-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+ heart:'<path d="M12 21s-8-5.5-8-11a4.5 4.5 0 018-3 4.5 4.5 0 018 3c0 5.5-8 11-8 11z"/>'};
+const ic=(k,c,s)=>'<svg width="'+(s||26)+'" height="'+(s||26)+'" viewBox="0 0 24 24" fill="none" stroke="'+(c||'#0a6cff')+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+ICO[k]+'</svg>';
+const TONES={blue:['#4d96ff','#0a6cff','#06214d'],silver:['#f4f6f9','#aab4c3','#6c7787'],gold:['#ffe38a','#e0ac1c','#9a6b00'],plat:['#f5fbff','#a9bdd3','#4f6a86']};
+const badge=(L,s)=>{const t=TONES[L.tone],z=s||60;return '<svg width="'+z+'" height="'+z+'" viewBox="0 0 64 64"><defs><linearGradient id="bg'+L.n+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+t[0]+'"/><stop offset=".6" stop-color="'+t[1]+'"/><stop offset="1" stop-color="'+t[2]+'"/></linearGradient></defs><circle cx="32" cy="32" r="29" fill="url(#bg'+L.n+')"/><circle cx="32" cy="32" r="23" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2"/><path d="M32 17l4.2 8.7 9.6 1.3-7 6.7 1.7 9.5L32 38.6l-8.5 4.6 1.7-9.5-7-6.7 9.6-1.3z" fill="#fff" fill-opacity=".92"/></svg>'};
+let spDemo=false,spTrips=1,spApp=null,spSel=0,spPrefs={};
+let students=[],meStu=null,passApps=[],notifs=[],hosts=[{id:'host',pw:'host123',name:'Demo host'}];
+const ADMIN={id:'admin',pw:'admin123'}; /* prototype only: real login must be checked on a server */
+function spData(){
+  if(spDemo)return{demo:true,name:'Demo student',id:'DEMO-0000',trips:spTrips};
+  const a=passApps.find(x=>x.st==='active'&&(!meStu||x.sid===meStu.id));
+  return a?{name:a.n,id:a.mid,trips:bookings.filter(b=>b.sid===a.sid&&b.st==='completed').length}:null;
+}
+function spProg(n){
+  const Ls=PASS_CFG.levels;let cur=null;Ls.forEach(L=>{if(L.tripsRequired!=null&&n>=L.tripsRequired)cur=L});
+  const next=Ls.find(L=>L.tripsRequired==null||n<L.tripsRequired)||null;
+  const pct=next&&next.tripsRequired!=null?Math.min(100,Math.round(n/next.tripsRequired*100)):100;
+  return{cur,next,pct};
+}
+const rewardTxt=L=>L?(L.reward.type==='discount'?L.reward.pct+'% off next trip':'Free trip eligibility*'):'';
+function nextTxt(n){const p=spProg(n);if(!p.next)return 'All levels reached';return p.next.tripsRequired!=null?n+' of '+p.next.tripsRequired+' trips to '+p.next.name:p.next.name+': milestone to be set'}
+function cardHTML(d){
+  const n=d?d.trips:0,p=spProg(n);
+  return '<div class="spc"><div class="spc-h"><img src="'+$('logo').src+'" alt="Student Days"><span class="tagp">'+(d?(d.demo?'DEMO DATA':'ACTIVE'):'PREVIEW')+'</span></div><div class="spc-t">STUDENT PASSPORT</div>'
+  +'<div class="spc-g"><div><small>NAME</small><b>'+(d?esc(d.name):'Your name')+'</b></div><div><small>MEMBER ID</small><b>'+(d?d.id:'On activation')+'</b></div><div><small>LEVEL</small><b>'+(p.cur?p.cur.name:'Explorer (start)')+'</b></div><div><small>COINS</small><b>\u2014</b></div></div>'
+  +'<div class="spc-bar"><i style="width:'+p.pct+'%"></i></div><small class="spc-s">'+nextTxt(n)+'</small></div>';
+}
+function lvlCards(){
+  return PASS_CFG.levels.map((L,i)=>'<div class="lv '+L.tone+(i===spSel?' sel':'')+'" role="button" tabindex="0" onclick="spSelect('+i+')" onkeydown="if(event.key===\'Enter\')spSelect('+i+')">'+badge(L)
+  +'<small>LEVEL '+L.n+'</small><h3>'+L.name.toUpperCase()+'</h3><p>'+L.text+'</p>'+(L.line?'<p class="ln">'+L.line+'</p>':'')
+  +'<div class="rw">'+ic(L.reward.type==='discount'?'tag':'plane','#0a6cff',20)+'<span>'+L.unlock+'</span></div>'
+  +'<span class="req">'+(L.tripsRequired!=null?'After '+L.tripsRequired+' trip'+(L.tripsRequired>1?'s':''):'Milestone to be set')+'</span></div>').join('');
+}
+function spSelect(i){spSel=i;$('lvs').innerHTML=lvlCards()}
+function spStats(){
+  const d=spData();
+  if(!d)return '<div class="lc"><b style="font-size:17px">No active passport yet</b><p class="sp-p" style="margin:6px 0 14px">Coins, trips and level appear once your passport is active.</p><div class="mrow"><button class="btn" onclick="spTo(\'sp-form\')">Apply for \u20B999</button><button class="btn gl" onclick="spDemoOn()">Preview demo</button></div></div>';
+  const p=spProg(d.trips);
+  return (d.demo?'<div class="demo-b">DEMO DATA \u2022 NOT REAL REWARDS</div>':'')+'<div class="sgrid">'
+  +'<div class="tl2"><small>Coins</small><b>\u2014</b><span>Rules to be set</span></div>'
+  +'<div class="tl2"><small>Trips completed</small><b>'+d.trips+'</b><span>Verified only</span></div>'
+  +'<div class="tl2"><small>Level</small><b>'+(p.cur?p.cur.name:'Explorer')+'</b><span>'+(p.cur?'Unlocked: '+rewardTxt(p.cur):'Complete 1 trip')+'</span></div>'
+  +'<div class="tl2"><small>Next</small><b>'+(p.next?p.next.name:'\u2014')+'</b><span>'+(p.next?rewardTxt(p.next):'')+'</span></div></div>'
+  +'<div class="lc" style="margin-top:10px"><b>Progress</b><div class="pbar"><i style="width:'+p.pct+'%"></i></div><span style="font-size:13px;color:#5b6577">'+nextTxt(d.trips)+'</span></div>'
+  +(d.demo?'<div class="mrow"><button class="btn" onclick="spCredit()">Demo: credit a trip</button><button class="btn gl" onclick="spDemoOff()">Exit demo</button></div>':'')
+  +(d.trips?'<ul class="hl">'+Array.from({length:d.trips},(_,i)=>'<li><span>'+(d.demo?'Demo trip ':'Trip ')+(d.trips-i)+'</span><small>Eligible \u2022 credited</small></li>').join('')+'</ul>':'<p class="hint" style="margin-top:10px">Your completed trips will appear here.</p>');
+}
+function spRefresh(){
+  if($('sp-card'))$('sp-card').innerHTML=cardHTML(spData());
+  if($('sp-stats'))$('sp-stats').innerHTML=spStats();
+  if($('spd').classList.contains('on'))spDash();
+}
+function spDemoOn(){spDemo=true;spTrips=1;spRefresh()}
+function spDemoOff(){spDemo=false;spRefresh()}
+function spCredit(){
+  spTrips=Math.min(6,spTrips+1);spRefresh();
+  const host=document.querySelector('.screen.on .sgrid')||$('sp-stats');host.style.position='relative';
+  for(let i=0;i<7;i++){const c=document.createElement('span');c.className='coin';c.style.left=(15+Math.random()*70)+'%';c.style.animationDelay=(i*70)+'ms';host.appendChild(c);setTimeout(()=>c.remove(),1500)}
+  toast('Demo trip credited');
+}
+const spTo=id=>{const e=$(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})};
+function openPassport(){spRender();go('sp');$('sp').scrollTop=0}
+function spRender(){
+  const v=id=>(($(id)&&$(id).value)||'').trim();
+  const prof={n:v('name'),m:v('mob'),c:v('col'),y:v('yr'),id:v('cid')};
+  const facts=[['\u20B999','One-time. No monthly fees.'],['10% \u2192 30%','Off your next trip, +10% per level.'],['Platinum','Free trip eligibility.*'],['Coins','Earned on eligible trips.'],['1st trip','Bring 1 friend to qualify.'],['Just for you','Applies to your trip, not the group.']];
+  const steps=[['join','01','Join','\u20B999 one-time.'],['trip','02','Travel','Take your first trip with us.'],['up','03','Level up','Complete trips, earn coins, climb levels.'],['gift','04','Unlock','Bigger discounts on future trips.']];
+  const ben=[['TRAVEL REWARDS','Bigger discounts as you level up.','tag',IMG.araku],['EXCLUSIVE MILESTONES','Unlock levels and special perks.','star',IMG.manali],['YOUR JOURNEY','Build your own travel record.','pin',IMG.manali],['MORE MEMORIES, MORE VALUE','Travel that rewards you.','heart',IMG.araku]];
+  const chips=(k,a)=>'<div class="chips" style="flex-wrap:wrap">'+a.map(x=>'<button class="chip" onclick="spChip(\''+k+'\',this)">'+x+'</button>').join('')+'</div>';
+  $('sp').innerHTML=
+  '<div class="sp-top"><button class="back" onclick="go(\'home\')" aria-label="Back">&lsaquo;</button><img src="'+DARKLOGO+'" alt="Student Days"></div>'
+  +'<h1 class="sp-h1">Your student life <em>Deserves a</em> travel passport.</h1>'
+  +'<p class="sp-p" style="margin-bottom:12px">Every trip levels up your passport and unlocks rewards.</p>'
+  +'<div class="fgrid">'+facts.map(f=>'<div class="fact"><b>'+f[0]+'</b><span>'+f[1]+'</span></div>').join('')+'</div><p class="hint" style="margin:6px 0 0">*Subject to final rules.</p>'
+  +'<div class="sp-hero" style="background-image:url('+SPHERO+')"><div class="tx"><h2>YOUR PASSPORT TO MORE.</h2><p>Every trip is a step towards StudentDays rewards.</p></div></div>'
+  +'<div id="sp-card">'+cardHTML(spData())+'</div>'
+  +'<button class="btn" style="width:100%;margin-top:18px" onclick="spTo(\'sp-form\')">APPLY FOR \u20B999</button>'
+  +'<p class="hint" style="text-align:center;margin-top:8px">Pay once. No monthly fees.</p>'
+  +'<div class="sec"><h2>How it works</h2>'+steps.map(s=>'<div class="stepc"><div class="si">'+ic(s[0])+'</div><div><small>'+s[1]+'</small><h3>'+s[2]+'</h3><p>'+s[3]+'</p></div></div>').join('')+'</div>'
+  +'<div class="sec"><h2>Levels and rewards</h2><div class="lvs" id="lvs">'+lvlCards()+'</div><p class="hint">Levels and milestones need final confirmation. *Subject to reward conditions.</p></div>'
+  +'<div class="sec"><h2>Every journey earns you something.</h2><p class="sp-p">Your travels move your passport forward.</p><div id="sp-stats" style="position:relative">'+spStats()+'</div></div>'
+  +'<div class="sec"><h2>Why join?</h2><div class="bgr">'+ben.map(b=>'<div class="bc" style="background-image:url('+b[3]+')"><div class="gi">'+ic(b[2],'#fff',18)+'</div><b>'+b[0]+'</b><p>'+b[1]+'</p></div>').join('')+'</div></div>'
+  +'<div class="sec" id="sp-form"><h2>Make your Student Passport official.</h2><p class="sp-p">A few details and you\u2019re set.</p><div class="lc">'
+  +'<label style="margin-top:0">Full name</label><input id="sp-n" value="'+esc(prof.n)+'" autocomplete="name">'
+  +'<label>Mobile number</label><input id="sp-m" inputmode="numeric" maxlength="10" value="'+esc(prof.m)+'">'
+  +'<label>College</label><input id="sp-c" value="'+esc(prof.c)+'">'
+  +'<label>Year of study</label><select id="sp-y"><option value="">Select</option>'+['1st year','2nd year','3rd year','4th year','5th year'].map(x=>'<option'+(x===prof.y?' selected':'')+'>'+x+'</option>').join('')+'</select>'
+  +'<label>College ID</label>'+(prof.id?'<div class="idon">\u2713 On file (\u2022\u2022\u2022'+esc(prof.id.slice(-3))+')<small>From your profile. No upload needed.</small></div><input id="sp-id" type="hidden" value="'+esc(prof.id)+'">':'<input id="sp-id" placeholder="College ID number">')
+  +'<label>How often will you travel with us?</label>'+chips('f',PASS_CFG.freq)
+  +'<label>How do you usually travel?</label>'+chips('s',PASS_CFG.style)
+  +'<p class="hint" style="margin-top:10px">Preferences only. No effect on rewards.</p>'
+  +'<div class="warn"><b>First trip: bring at least 1 friend</b>This is needed to start your reward progression. The friend must meet StudentDays.co\u2019s booking rules.</div>'
+  +'<div class="fee"><span>Student Passport</span><b>\u20B999</b></div><p class="hint" style="margin-top:6px">One-time. No monthly fees.</p>'
+  +'<label class="chk"><input type="checkbox" id="sp-t"><span>I agree to the <a class="lnk" style="margin:0" onclick="spTerms()">Terms &amp; Conditions</a>.</span></label>'
+  +'<div class="err" id="sp-e"></div><button class="btn" id="sp-go" style="width:100%;margin-top:6px" onclick="spSubmit()">CONTINUE TO PAYMENT \u2014 \u20B999</button><div id="sp-pay"></div></div></div>'
+  +'<div class="sec"><details class="tm" id="sp-tm"><summary>TERMS &amp; CONDITIONS</summary>'+TERMS.map(t=>'<details><summary>'+t[0]+'</summary><p>'+t[1]+'</p></details>').join('')+'</details>'
+  +'<p class="hint" style="margin-top:10px">Final milestones, exclusions and free-trip rules will be published by StudentDays.co. Draft terms, pending legal review.</p></div>'
+  +'<div class="story">Don\u2019t just travel. Collect your stories.</div>';
+  spPrefs={};
+}
+function spChip(k,el){spPrefs[k]=el.textContent;[...el.parentNode.children].forEach(c=>c.classList.toggle('on',c===el))}
+function spTerms(){const t=$('sp-tm');t.open=true;spTo('sp-tm')}
+function spSubmit(){
+  const e=m=>{$('sp-e').textContent=m;return false};
+  const n=$('sp-n').value.trim(),m=$('sp-m').value.trim(),c=$('sp-c').value.trim(),y=$('sp-y').value,id=$('sp-id').value.trim();
+  if(n.length<2)return e('Enter your full name.');
+  if(!/^[6-9]\d{9}$/.test(m))return e('Enter a valid 10-digit mobile number.');
+  if(!c)return e('Enter your college.');
+  if(!y)return e('Select your year of study.');
+  if(id.length<3)return e('Enter your College ID.');
+  if(!$('sp-t').checked)return e('Agree to the Terms & Conditions.');
+  e('');
+  spApp=spApp||{key:'APP-'+Date.now().toString(36)};          // reused on retry: no duplicate application
+  Object.assign(spApp,{n,m,c,y,id,prefs:spPrefs});
+  spApp.sid=meStu&&meStu.id;spApp.st=spApp.st||'payment pending';spApp.t=spApp.t||Date.now();
+  if(!passApps.includes(spApp))passApps.push(spApp);
+  spPayState('creating');
+  setTimeout(()=>spPayState(PASS_CFG.paymentEnabled?'pending':'unconfigured'),900);
+}
+function spPayState(s){
+  const el=$('sp-pay'),b=$('sp-go');b.disabled=(s==='creating');
+  const retry='<div class="mrow"><button class="btn" onclick="spSubmit()">Retry</button><button class="btn gl" onclick="spTo(\'sp-form\')">Edit details</button></div>';
+  const M={
+   creating:'<span class="spin"></span>Preparing secure payment\u2026',
+   pending:'<b>Payment pending.</b><br>Your passport activates after the payment is verified.',
+   failed:'<b>Payment failed.</b><br>Nothing is marked paid. Retry safely, with no double charge.'+retry,
+   unconfigured:'<b>Application saved. Payment isn\u2019t connected yet.</b><br>Your passport stays inactive until a verified payment exists. The admin can see your application.<br><br><b>Backend to build</b><code>POST /api/passport/applications (idempotent)</code><code>POST /api/passport/payments/order (\u20B999)</code><code>POST /api/passport/payments/verify</code><code>Webhook \u2192 activate passport + member ID</code>'+retry+'<a class="lnk" onclick="spPreviewOk()">Design preview: success screen (demo)</a>'
+  };
+  el.innerHTML='<div class="paybox" role="status">'+M[s]+'</div>';
+}
+function spPreviewOk(){spOk({demo:true,name:esc((spApp&&spApp.n)||'Demo student'),id:'DEMO-0000',trips:0})}
+function spOk(d){
+  const p=spProg(d.trips);
+  $('spk').innerHTML='<div class="sp-top"><button class="back" onclick="go(\'sp\')" aria-label="Back">&lsaquo;</button><img src="'+DARKLOGO+'" alt="Student Days"></div>'
+  +(d.demo?'<div class="demo-b">DESIGN PREVIEW \u2022 DEMO DATA</div>':'')
+  +'<h1 class="sp-h1">Welcome to your Student Passport.</h1><p class="sp-p">Your journey has begun. Every eligible trip brings your next reward closer.</p>'
+  +cardHTML(d).replace('class="spc"','class="spc" style="margin:0 0 14px"')
+  +'<div class="sgrid"><div class="tl2"><small>Status</small><b style="font-size:18px">'+(d.demo?'Demo':'Active')+'</b></div><div class="tl2"><small>Trips</small><b>'+d.trips+'</b></div><div class="tl2"><small>Coins</small><b>\u2014</b></div><div class="tl2"><small>Next</small><b style="font-size:18px">'+(p.next?p.next.name:'\u2014')+'</b><span>'+nextTxt(d.trips)+'</span></div></div>'
+  +'<div class="mrow" style="margin-top:18px"><button class="btn" onclick="spDemo='+(d.demo?'true':'false')+';spDash()">VIEW MY PASSPORT</button><button class="btn gl" onclick="openTrips()">EXPLORE TRIPS</button></div>';
+  go('spk');$('spk').scrollTop=0;
+}
+function spDash(){
+  const d=spData(),led=d?PASS_CFG.levels.filter(L=>L.tripsRequired!=null&&d.trips>=L.tripsRequired):[];
+  $('spd').innerHTML='<div class="sp-top"><button class="back" onclick="go(\'sp\')" aria-label="Back">&lsaquo;</button><img src="'+DARKLOGO+'" alt="Student Days"></div><h1 class="sp-h1" style="font-size:26px">My Student Passport</h1>'
+  +cardHTML(d).replace('class="spc"','class="spc" style="margin:0 0 14px"')+'<div id="sp-dstats" style="position:relative">'+spStats()+'</div>'
+  +'<div class="sec" style="margin-top:22px"><h2 style="font-size:18px">Reward ledger</h2>'+(led.length?'<ul class="hl">'+led.map(L=>'<li><span>'+L.name+': '+rewardTxt(L)+'</span><small>'+(d.demo?'demo entry':'unlocked')+'</small></li>').join('')+'</ul>':'<div class="lc"><p class="sp-p" style="margin:0">Unlocks and redemptions are recorded here. Nothing yet.</p></div>')+'</div>'
+  +'<button class="btn" style="width:100%;margin-top:18px" onclick="openTrips()">EXPLORE UPCOMING TRIPS</button>';
+  go('spd');
+}
+
+/* ---------- Student profile, notifications ---------- */
+function regStudent(){
+  const v=id=>(($(id)&&$(id).value)||'').trim();
+  const mob=v('mob');
+  let s=students.find(x=>mob&&x.mobile===mob);
+  const data={name:v('name')||'Guest (skipped sign-up)',mobile:mob,email:v('eml'),college:v('col'),year:v('yr'),age:v('age'),cid:v('cid'),city:city};
+  if(s&&s.status==='suspended'){toast('This account is suspended. Contact support.');go('welcome');return false}
+  if(s)Object.assign(s,data);else{s=Object.assign({id:'S'+(1001+students.length),joined:Date.now(),status:'active'},data);students.push(s)}
+  meStu=s;updateDot();return true;
+}
+const forMe=n=>meStu&&(n.to==='all'||n.to===meStu.id);
+function updateDot(){const n=meStu?notifs.filter(x=>forMe(x)&&!x.seen[meStu.id]).length:0;$('home').classList.toggle('nonew',!n)}
+const fmtT=t=>new Date(t).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+function openNotifs(){
+  const l=notifs.filter(forMe);
+  $('nt').innerHTML='<div class="sp-top"><button class="back" onclick="go(\'home\')" aria-label="Back">&lsaquo;</button><h1 style="margin:0;font-size:22px">Updates</h1><span style="width:40px"></span></div>'
+  +(l.length?l.map(n=>'<div class="nt"><b>'+esc(n.title)+'</b><p>'+esc(n.msg)+'</p><small>'+fmtT(n.t)+(n.to==='all'?'':' \u2022 For you')+'</small></div>').join(''):'<div class="empty">No updates yet.</div>');
+  l.forEach(n=>{n.seen[meStu.id]=1});updateDot();go('nt');
+}
+
+/* ---------- Admin + host ---------- */
+let adSec='Overview',adQ='',asel='all',adLogs=[];
+const SECS=['Overview','Students','Passport','Bookings','Private trips','Chat','VibeMate','Trips','Notify list','Hosts','Updates'];
+function adLogin(){
+  if($('al-i').value.trim()===ADMIN.id&&$('al-p').value===ADMIN.pw){$('al-p').value='';$('al-e').textContent='';adSec='Overview';adRender();go('ad')}
+  else $('al-e').textContent='Incorrect admin ID or password.';
+}
+function hostLogin(){
+  const x=hosts.find(k=>k.id===$('hl-i').value.trim()&&k.pw===$('hl-p').value);
+  if(x){$('hl-p').value='';$('hl-e').textContent='';hostRender(x);go('hp')}else $('hl-e').textContent='Incorrect host ID or password.';
+}
+const pend={Passport:()=>passApps.filter(a=>a.st==='payment pending').length,'Private trips':()=>pts.filter(p=>p.st==='quote requested').length,Chat:()=>myRooms.filter(r=>r.st==='pending').length+modQ.length,VibeMate:()=>vmReports.length};
+function adGo(s){adSec=s;adRender();$('ad').scrollTop=0}
+function adRender(){
+  $('ad').innerHTML='<div class="sp-top"><div><h1 style="margin:0;font-size:22px">Admin dashboard</h1><p class="hint" style="margin:0">StudentDays.co</p></div><button class="btn gl" style="padding:10px 16px;font-size:13px" onclick="go(\'welcome\')">Exit</button></div>'
+  +'<div class="chips">'+SECS.map(s=>{const n=pend[s]?pend[s]():0;return '<button class="chip'+(s===adSec?' on':'')+'" onclick="adGo(\''+s+'\')">'+s+(n?'<span class="nb">'+n+'</span>':'')+'</button>'}).join('')+'</div><div id="adb">'+adBody()+'</div>';
+}
+const stuName=id=>{const s=students.find(x=>x.id===id);return s?s.name:'Unknown'};
+const chip=(t,c)=>'<span class="tag2 '+(c||'')+'">'+t+'</span>';
+const stClr=s=>({active:'g',completed:'g',confirmed:'g',approved:'g',upcoming:'',cancelled:'r',rejected:'r',suspended:'r'}[s]||'y');
+function adBody(){
+  const f={Overview:adOverview,Students:adStudents,Passport:adPassport,Bookings:()=>adBookings(true),'Private trips':adPT,Chat:adChat,Trips:adTrips,VibeMate:adVibe,'Notify list':adNotify,Hosts:adHosts,Updates:adUpdates}[adSec];
+  return f();
+}
+function adOverview(){
+  const act=bookings.filter(b=>b.st!=='cancelled'),col=act.reduce((a,b)=>a+b.paid,0)+99*passApps.filter(a=>a.st==='active').length;
+  const T=[['Students',students.length,'Students'],['Passport apps',passApps.length+' ('+pend.Passport()+' pending)','Passport'],['Bookings',bookings.length,'Bookings'],['Collected (demo)',money(col),'Bookings'],['Private trips',pts.length,'Private trips'],['Rooms pending',myRooms.filter(r=>r.st==='pending').length,'Chat'],['Reports',modQ.length,'Chat'],['VibeMate',vmProfiles.filter(p=>!p.sample).length+' ('+vmReports.length+' reports)','VibeMate'],['Notify list',notifyReqs.length,'Notify list'],['Hosts',hosts.length,'Hosts']];
+  const ev=[].concat(students.map(s=>({t:s.joined,x:'New student: '+esc(s.name)})),passApps.map(a=>({t:a.t,x:'Passport application: '+esc(a.n)})),bookings.map(b=>({t:b.t||0,x:'Booking '+b.id+' by '+esc(b.who||'Guest')})),pts.map(p=>({t:p.id,x:'Private trip request: '+esc(p.dest)}))).sort((a,b)=>b.t-a.t).slice(0,8);
+  return '<div class="sgrid">'+T.map(t=>'<div class="tl2" onclick="adGo(\''+t[2]+'\')" style="cursor:pointer"><small>'+t[0]+'</small><b style="font-size:'+(String(t[1]).length>6?'16':'24')+'px">'+t[1]+'</b></div>').join('')+'</div>'
+  +'<h3 style="margin:20px 0 8px">Recent activity</h3>'+(ev.length?'<ul class="hl">'+ev.map(e=>'<li><span>'+e.x+'</span><small>'+fmtT(e.t)+'</small></li>').join('')+'</ul>':'<div class="lc"><p class="sp-p" style="margin:0">Nothing yet. Sign-ups, applications and bookings from the app appear here.</p></div>');
+}
+function stuList(){
+  const q=adQ.toLowerCase(),l=students.filter(s=>!q||(s.name+s.mobile+s.email+s.college).toLowerCase().includes(q));
+  return l.length?l.map(s=>{const a=passApps.find(x=>x.sid===s.id);
+    return '<div class="lc adc"><div class="rt"><b>'+esc(s.name)+'</b>'+chip(s.status,stClr(s.status))+'</div><div class="m">'+esc(s.mobile||'No mobile')+' \u2022 '+esc(s.email||'No email')+'</div><div class="m">'+esc(s.college||'No college')+' \u2022 '+esc(s.year||'-')+' \u2022 Age '+esc(s.age||'-')+' \u2022 ID '+esc(s.cid||'-')+'</div><div class="m">'+esc(s.city||'No city')+' \u2022 Joined '+fmtT(s.joined)+'</div>'
+    +chip(a?'Passport: '+a.st:'No passport',a?stClr(a.st):'')+'<div class="mrow"><button class="btn gl" onclick="adMsg(\''+s.id+'\')">Message</button><button class="btn gl" onclick="adStuToggle(\''+s.id+'\')">'+(s.status==='active'?'Suspend':'Activate')+'</button><button class="btn gl" onclick="adStuDel(\''+s.id+'\')">Delete</button></div></div>'}).join(''):'<div class="empty">No students yet.<br>Profiles appear here after sign-up.</div>';
+}
+function adStudents(){return '<input placeholder="Search name, mobile, college" value="'+esc(adQ)+'" oninput="adQ=this.value;$(\'adlist\').innerHTML=stuList()" style="margin-bottom:12px"><div id="adlist">'+stuList()+'</div>'}
+const adMsg=id=>{asel=id;adGo('Updates')};
+function adStuToggle(id){const s=students.find(x=>x.id===id);s.status=s.status==='active'?'suspended':'active';adRender()}
+function adStuDel(id){sheet('Delete this profile?','The profile is removed from the dashboard. This cannot be undone.','Delete',()=>{students=students.filter(x=>x.id!==id);if(meStu&&meStu.id===id)meStu=null;adRender()})}
+function adPassport(){
+  return '<p class="hint" style="margin:0 0 10px">Approve only after the \u20B999 payment is verified in your payment dashboard.</p>'+(passApps.length?passApps.slice().reverse().map(a=>{const i=passApps.indexOf(a);
+    return '<div class="lc adc"><div class="rt"><b>'+esc(a.n)+'</b>'+chip(a.st,stClr(a.st))+'</div><div class="m">'+esc(a.m)+' \u2022 '+esc(a.c)+' \u2022 '+esc(a.y)+' \u2022 ID '+esc(a.id)+'</div><div class="m">Travels: '+esc(a.prefs.f||'-')+' \u2022 Style: '+esc(a.prefs.s||'-')+'</div><div class="m">Applied '+fmtT(a.t)+(a.mid?' \u2022 Member ID '+a.mid:'')+'</div>'
+    +(a.st==='payment pending'?'<div class="mrow"><button class="btn" onclick="adPass('+i+',true)">Approve</button><button class="btn gl" onclick="adPass('+i+',false)">Reject</button></div>':'')+'</div>'}).join(''):'<div class="empty">No passport applications yet.</div>');
+}
+function adPass(i,ok){const a=passApps[i];if(ok){a.st='active';a.mid='SD2026'+String(passApps.filter(x=>x.mid).length+1).padStart(3,'0');toast('Passport activated')}else a.st='rejected';adRender()}
+function adBookings(full){
+  return bookings.length?bookings.map((b,i)=>{const t=tr(b.tid);
+    return '<div class="lc adc"><div class="rt"><b>'+t.t+'</b>'+chip(b.st,stClr(b.st))+'</div><div class="m">'+esc(b.who||'Guest')+' \u2022 '+b.n+' student'+(b.n>1?'s':'')+' \u2022 '+t.when+'</div><div class="m">Paid '+money(b.paid)+' \u2022 Balance '+money(b.bal)+' \u2022 '+b.id+'</div>'
+    +(full&&b.st==='upcoming'?'<div class="mrow"><button class="btn" onclick="adBk('+i+',\'completed\')">Mark completed</button><button class="btn gl" onclick="adBk('+i+',\'cancelled\')">Cancel</button></div>':'')+'</div>'}).join(''):'<div class="empty">No bookings yet.<br>Trip bookings from the app appear here.</div>';
+}
+function adBk(i,s){bookings[i].st=s;adRender()}
+function adPT(){
+  return pts.length?pts.map(p=>'<div class="lc adc"><div class="rt"><b>'+esc(p.dest)+'</b>'+chip(p.st,stClr(p.st))+'</div><div class="m">'+esc(p.who||'Guest')+' \u2022 '+p.n+' students'+(p.s?' \u2022 '+dfmt(p.s)+' to '+dfmt(p.e):'')+'</div><div class="m">'+[p.bud,p.tr,p.stay].filter(Boolean).map(esc).join(' \u2022 ')+(p.fr.length?' \u2022 '+p.fr.length+' friends':'')+'</div>'
+    +(p.st==='quote requested'?'<div class="mrow"><button class="btn" onclick="adPTc('+p.id+')">Confirm trip</button></div>':'')+'</div>').join(''):'<div class="empty">No private trip requests yet.</div>';
+}
+function adPTc(id){pts.find(x=>x.id===id).st='confirmed';adRender()}
+function adChat(){
+  const pr=myRooms.filter(r=>r.st==='pending');
+  adLogs=[].concat(rooms.map(r=>({n:r.n,m:r.msgs})),reqs.map(r=>({n:'Direct chat with '+r.h,m:r.msgs})));
+  return '<h3 style="margin:0 0 8px">Rooms awaiting approval</h3>'+(pr.length?pr.map(r=>'<div class="lc adc"><div class="rt"><b>'+esc(r.n)+'</b>'+chip('pending','y')+'</div><div class="m">'+r.l+' \u2022 '+r.k+'</div><div class="mrow"><button class="btn" onclick="adRoom(\''+r.id+'\',true)">Approve</button><button class="btn gl" onclick="adRoom(\''+r.id+'\',false)">Reject</button></div></div>').join(''):'<div class="lc adc"><p class="m" style="margin:0">None.</p></div>')
+  +'<h3 style="margin:18px 0 8px">Reports</h3>'+(modQ.length?modQ.map((q,i)=>'<div class="lc adc"><div class="rt"><b>'+esc(q.h)+'</b>'+chip('reported','r')+'</div><div class="m">'+esc(q.reason)+(q.room?' \u2022 '+esc(q.room):'')+' \u2022 '+fmtT(q.t)+'</div><div class="mrow"><button class="btn gl" onclick="modQ.splice('+i+',1);adRender()">Dismiss</button></div></div>').join(''):'<div class="lc adc"><p class="m" style="margin:0">No reports.</p></div>')
+  +'<h3 style="margin:18px 0 8px">Chat logs</h3>'+adLogs.map((l,i)=>'<div class="lc adc"><div class="rt"><b>'+esc(l.n)+'</b><button class="btn gl" style="padding:8px 14px;font-size:13px" onclick="adLog('+i+')">View log</button></div><div class="m">'+l.m.length+' messages</div></div>').join('');
+}
+function adRoom(id,ok){const r=myRooms.find(x=>x.id===id);if(ok){r.st='approved';rooms.unshift(r);toast('Room approved')}else r.st='rejected';adRender()}
+function adLog(i){const l=adLogs[i];sheet(l.n,l.m.length?l.m.slice(-25).map(m=>m.h+': '+m.t).join('\n'):'No messages yet.','Close')}
+function adTrips(){
+  return TRIPS.map(t=>{const bk=bookings.filter(b=>b.tid===t.id&&b.st!=='cancelled');return '<div class="lc adc"><div class="rt"><b>'+t.t+'</b>'+chip(t.soon?'coming soon':'open',t.soon?'y':'g')+'</div><div class="m">'+t.when+(t.soon?'':' \u2022 '+money(t.p)+' \u2022 pre-booking '+money(t.pre))+'</div><div class="m">'+bk.length+' bookings \u2022 '+bk.reduce((a,b)=>a+b.n,0)+' students \u2022 '+money(bk.reduce((a,b)=>a+b.paid,0))+' collected</div></div>'}).join('');
+}
+function adHosts(){
+  return '<div class="lc adc"><b>Add host</b><label>Name</label><input id="h-n"><label>Host ID</label><input id="h-i"><label>Password</label><input id="h-p" type="password"><div class="err" id="h-e"></div><button class="btn" style="width:100%" onclick="adAddHost()">Add host</button></div>'
+  +hosts.map((x,i)=>'<div class="lc adc"><div class="rt"><b>'+esc(x.name)+'</b><button class="btn gl" style="padding:8px 14px;font-size:13px" onclick="hosts.splice('+i+',1);adRender()">Remove</button></div><div class="m">ID: '+esc(x.id)+'</div></div>').join('');
+}
+function adAddHost(){
+  const n=$('h-n').value.trim(),i=$('h-i').value.trim(),p=$('h-p').value;
+  if(!n||i.length<3||p.length<6)return $('h-e').textContent='Enter a name, an ID (3+ characters) and a password (6+ characters).';
+  if(i===ADMIN.id||hosts.some(x=>x.id===i))return $('h-e').textContent='That ID is already taken.';
+  hosts.push({id:i,pw:p,name:n});adRender();toast('Host added');
+}
+function adUpdates(){
+  return '<div class="lc adc"><b>Send an update</b><label>Send to</label><select id="u-a"><option value="all">All students</option>'+students.map(s=>'<option value="'+s.id+'"'+(asel===s.id?' selected':'')+'>'+esc(s.name)+' ('+esc(s.mobile||s.id)+')</option>').join('')+'</select>'
+  +'<label>Title</label><input id="u-t" maxlength="60" placeholder="e.g. Araku trip dates announced"><label>Message</label><textarea id="u-m" maxlength="400" placeholder="Write your message"></textarea><button class="btn" style="width:100%;margin-top:12px" onclick="adSend()">Send update</button></div>'
+  +'<h3 style="margin:18px 0 8px">Sent updates</h3>'+(notifs.length?notifs.map(n=>'<div class="nt"><b>'+esc(n.title)+'</b><p>'+esc(n.msg)+'</p><small>To '+(n.to==='all'?'all students':esc(stuName(n.to)))+' \u2022 '+fmtT(n.t)+' \u2022 seen by '+Object.keys(n.seen).length+'</small></div>').join(''):'<div class="empty">No updates sent yet.</div>');
+}
+function adSend(){
+  const t=$('u-t').value.trim(),m=$('u-m').value.trim(),a=$('u-a').value;
+  if(!t||!m)return toast('Add a title and a message');
+  notifs.unshift({id:Date.now(),to:a,title:t,msg:m,t:Date.now(),seen:{}});asel='all';updateDot();
+  toast(a==='all'?'Sent to all students':'Sent to '+stuName(a));adRender();
+}
+function hostRender(x){
+  $('hp').innerHTML='<div class="sp-top"><div><h1 style="margin:0;font-size:22px">Host panel</h1><p class="hint" style="margin:0">'+esc(x.name)+'</p></div><button class="btn gl" style="padding:10px 16px;font-size:13px" onclick="go(\'welcome\')">Exit</button></div>'
+  +'<h3 style="margin:0 0 8px">Trips</h3>'+adTrips()+'<h3 style="margin:18px 0 8px">Bookings</h3>'+adBookings(false);
+}
+$('wlogo').src=$('logo').src;updateDot();
+
+/* ---------- Home carousel, Kerala itinerary, Manali notify ---------- */
+const KR={"hero": "assets/asset02.jpg", "tea": "assets/asset12.jpg", "resort": "assets/asset13.jpg", "sunset": "assets/asset14.jpg", "boat": "assets/asset15.jpg", "falls": "assets/asset16.jpg", "room": "assets/asset17.jpg"};
+let notifyReqs=[],nf=null;
+const car=$('car');
+car.addEventListener('scroll',()=>{const k=car.children[1].offsetLeft-car.children[0].offsetLeft||1,i=Math.round(car.scrollLeft/k);[...$('cdots').children].forEach((d,j)=>d.classList.toggle('on',j===i))},{passive:true});
+const KDAYS=[
+ {h:'Day 0: Start from Hyderabad',s:'Train journey with your gang. Tickets included.',img:null,b:[]},
+ {h:'Day 1: Kochi to Munnar',s:'Tea gardens, waterfalls and misty hills',img:KR.tea,b:[['MORNING',['Reach Kochi and meet your trip team','Pickup from Kochi, transfer to Munnar','Stop at Cheeyapara Waterfalls']],['AFTERNOON',['Check-in at Munnar','Mattupetty Dam','Elephant Park and Photo Point','Botanical Garden']],['NIGHT',['Dinner and overnight stay in Munnar']]],n:'Rest well. Tomorrow starts at 3:00 AM for the sunrise of a lifetime.'},
+ {h:'Day 2: Kolukkumalai to Alappuzha',s:'Sunrise above the clouds, then the backwaters',img:KR.sunset,b:[['3:00 AM',['Early wake-up','Depart for Kolukkumalai, one of the highest tea estates in the world']],['MORNING',['Kolukkumalai sunrise','Return and have breakfast']],['AFTERNOON',['Depart for Alappuzha','Check-in to your houseboat','Backwater cruise','Kerala-style scenery and local experience']],['NIGHT',['Dinner and overnight stay on the houseboat']]]},
+ {h:'Day 3: Alappuzha to Athirapally to Kochi',s:'Thundering falls, then homeward bound',img:KR.falls,b:[['9:00 AM',['Breakfast','Houseboat checkout']],['MORNING',['Transfer to Athirapally']],['AFTERNOON',['Athirapally Waterfalls, the Niagara of India','Thumboormuzhy Dam','Butterfly Park','Hanging Bridge']],['EVENING',['Depart towards Kochi and reach Kochi']]],n:'Return to Hyderabad by train.'}];
+const KINC=[['Train tickets','Hyderabad to Kochi and back'],['Local transport','All pickups, transfers and sightseeing in Kerala'],['Comfortable stays','Hand-picked stays'],['Houseboat stay','A full night on the Alappuzha backwaters'],['Food on the boat','Kerala-style breakfast, lunch and dinner*'],['Tent stay on the peak','Camp at Kolukkumalai peak'],['Photos and videos','Every moment captured'],['Documentary shoot','Your trip as a keepsake film'],['Guide and support','A team with you throughout']];
+function openKerala(){
+  const bt=[[24,9,'24 Oct'],[31,9,'31 Oct'],[3,10,'3 Nov'],[14,10,'14 Nov']];
+  $('kr').innerHTML='<div class="khero" style="background-image:linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.05) 40%,rgba(5,5,5,.95)),url('+KR.hero+')"><button class="back" onclick="go(\'home\')" aria-label="Back">&lsaquo;</button><div><span class="pill">Oct 31 \u2013 Nov 5</span><h1 style="margin-top:8px;font-size:34px">Kerala</h1><div style="color:#ddd;font-size:13px">God\u2019s own country \u2022 A trip you\u2019ll never forget</div></div></div>'
+  +'<div class="rtl" style="margin-top:14px">'+['Hyderabad','Kochi','Munnar','Kolukkumalai','Alappuzha','Athirapally','Kochi','Hyderabad'].map((x,i)=>(i?'<i>\u2192</i>':'')+'<span>'+x+'</span>').join('')+'</div>'
+  +'<div class="chips" style="flex-wrap:wrap;margin-top:12px"><span class="chip on">Pickup and drop: Hyderabad</span><span class="chip on">Only for college students (female and male)</span></div>'
+  +'<div class="dsec"><h3>All-inclusive package</h3><div class="price"><b>\u20B97,999</b><span>per student</span></div><p class="hint" style="margin-top:8px">Train tickets, stays, houseboat night, all meals*, tent stay on the peak, photos, videos and a documentary shoot. About \u20B91,600 per day. 5 days including travel days (train to and from Kochi).</p></div>'
+  +'<div class="dsec"><h3>Upcoming batches</h3><div class="kbt">'+bt.map(b=>{const c=new Date(2026,b[1],b[0],23,59)<Date.now();return '<div class="'+(c?'cl':(b[2]==='31 Oct'?'ft':''))+'"><b>'+b[2]+'</b>'+(c?'Closed':(b[2]==='31 Oct'?'Oct 31 \u2013 Nov 5':'Open'))+'</div>'}).join('')+'</div><p class="hint">All batches are subject to group booking.</p></div>'
+  +'<div class="dsec"><h3>Itinerary</h3>'+KDAYS.map(d=>'<div class="day">'+(d.img?'<div class="kimg" style="background-image:url('+d.img+')"></div>':'')+'<b>'+d.h+'</b><span style="color:#9a9a9a;font-size:12px">'+d.s+'</span>'+d.b.map(x=>'<div class="blk"><b>'+x[0]+'</b><ul>'+x[1].map(y=>'<li>'+y+'</li>').join('')+'</ul></div>').join('')+(d.n?'<div class="night">'+d.n+'</div>':'')+'</div>').join('')+'</div>'
+  +'<div class="dsec"><h3>Where you\u2019ll stay</h3><div class="day"><div class="kimg" style="background-image:url('+KR.resort+')"></div><b>Munnar resort</b>The whole resort is reserved for our group: comfortable rooms and misty hill views. Separate rooms for girls and boys. Safe, comfortable and private for everyone.</div>'
+  +'<div class="day"><div class="kimg" style="background-image:url('+KR.boat+')"></div><b>Alappuzha houseboat</b>A whole day and night afloat on your own houseboat. Breakfast, lunch and dinner served on board.</div></div>'
+  +'<div class="dsec"><h3>What\u2019s included</h3><div class="ig">'+KINC.map(x=>'<div><b>'+x[0]+'</b>'+x[1]+'</div>').join('')+'</div><p class="hint">*Except food on trains. Lunch on one day is not included.</p></div>'
+  +'<div class="dsec"><h3>Pre-book your seat</h3><p class="hint" style="margin:0 0 10px">Choose your preferred date and complete your pre-booking. Grab your seat before the batch fills up.</p><a class="btn" href="https://forms.gle/zBD1r477KBZxSiDF6" target="_blank" rel="noopener">PRE-BOOKING FORM</a></div>'
+  +'<div class="dsec"><h3>First time with StudentDays.co?</h3><p class="hint" style="margin:0 0 10px">We understand the trust questions. Don\u2019t just take our word for it. Strangers \u2192 friends \u2192 unforgettable memories.</p><div class="mrow"><a class="btn gl" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.25)" href="https://youtu.be/4E648bz2aR4?si=Qe0FUyAemndWasDa" target="_blank" rel="noopener">Our recent documentary</a><a class="btn gl" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.25)" href="https://youtu.be/lN502PsnETI?si=PemYUtisClizoixK" target="_blank" rel="noopener">Raw moments</a></div>'
+  +'<ul class="pl" style="margin-top:12px"><li>Cinematic documentary included</li><li>Professional photos included</li><li>Meet students from different colleges</li><li>Create memories you\u2019ll want to remember</li></ul><p class="hint">Your trip shouldn\u2019t end when you reach home. It should become a story you can watch again.</p></div>';
+  go('kr');$('kr').scrollTop=0;
+}
+/* Manali: Get Notified */
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const addD=(s,n)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return iso(d)};
+function nfOpen(){
+  const v=id=>(($(id)&&$(id).value)||'').trim();
+  nf={name:v('name'),mob:v('mob'),mode:'',n:3,s:'',e:''};nfRender();$('nf').classList.add('on');
+}
+const nfClose=()=>$('nf').classList.remove('on');
+function nfRender(){
+  const t=iso(new Date());
+  $('nfs').innerHTML='<button class="px" onclick="nfClose()" aria-label="Close">\u2715</button><h2>Get notified: Podam Manali</h2><p class="sub" style="margin:6px 0 4px">Tell us your plan. We\u2019ll message you when December details open.</p>'
+  +'<label>Name</label><input value="'+esc(nf.name)+'" oninput="nf.name=this.value" autocomplete="name">'
+  +'<label>Mobile number</label><input inputmode="numeric" maxlength="10" value="'+esc(nf.mob)+'" oninput="nf.mob=this.value">'
+  +'<label>Travelling</label><div class="chips">'+['Solo','Group'].map(x=>'<button class="chip'+(nf.mode===x?' on':'')+'" onclick="nf.mode=\''+x+'\';nfRender()">'+x+'</button>').join('')+'</div>'
+  +(nf.mode==='Group'?'<label>Group size</label><div class="stp"><span>People</span><div><button onclick="nf.n=Math.max(2,nf.n-1);nfRender()">\u2212</button><span>'+nf.n+'</span><button onclick="nf.n=Math.min(50,nf.n+1);nfRender()">+</button></div></div>':'')
+  +'<label>Preferred dates (1 week)</label><div class="row"><div><label style="margin-top:0">Start</label><input type="date" min="'+t+'" value="'+nf.s+'" onchange="nfStart(this.value)"></div><div><label style="margin-top:0">End</label><input type="date" '+(nf.s?'min="'+nf.s+'" max="'+addD(nf.s,6)+'"':'disabled')+' value="'+nf.e+'" onchange="nf.e=this.value"></div></div>'
+  +'<p class="hint">Pick up to a 7-day window.</p><div class="err" id="nf-e"></div><button class="btn" style="width:100%" onclick="nfSubmit()">Notify me</button>';
+}
+function nfStart(s){nf.s=s;nf.e=s?addD(s,6):'';nfRender()}
+function nfSubmit(){
+  const e=m=>{$('nf-e').textContent=m};
+  if(nf.name.trim().length<2)return e('Enter your name.');
+  if(!/^[6-9]\d{9}$/.test(nf.mob.trim()))return e('Enter a valid 10-digit mobile number.');
+  if(!nf.mode)return e('Choose Solo or Group.');
+  if(nf.mode==='Group'&&nf.n<2)return e('Group size must be 2 or more.');
+  if(!nf.s||!nf.e)return e('Choose your start and end dates.');
+  if(nf.e<nf.s||nf.e>addD(nf.s,6))return e('Choose a window of up to 7 days.');
+  notifyReqs.unshift({id:Date.now(),name:nf.name.trim(),mobile:nf.mob.trim(),mode:nf.mode,n:nf.mode==='Group'?nf.n:1,s:nf.s,e:nf.e,trip:'Podam Manali',sid:meStu&&meStu.id,t:Date.now()});
+  nfClose();toast('You\u2019re on the list. We\u2019ll notify you.');
+}
+function showOpen(){
+  sheet('Student Reality Travel Show','Two influencers are given a fixed amount of money and a random destination. They have to travel and survive with only that amount, while our cameraman follows and records every moment.\n\nLaunching soon on StudentDays Originals.','Notify me',()=>{
+    const s=meStu;notifyReqs.unshift({id:Date.now(),name:s?s.name:'Guest',mobile:s?s.mobile:'',mode:'',n:0,s:'',e:'',trip:'Student Reality Travel Show',sid:s&&s.id,t:Date.now()});
+    toast('We\u2019ll notify you when the show launches');
+  });
+}
+function adNotify(){
+  return notifyReqs.length?notifyReqs.map(r=>'<div class="lc adc"><div class="rt"><b>'+esc(r.name)+'</b>'+chip(r.trip,'')+'</div><div class="m">'+esc(r.mobile||'No mobile')+(r.mode?' \u2022 '+(r.mode==='Group'?'Group of '+r.n:'Solo'):'')+'</div><div class="m">'+(r.s?'Preferred: '+dfmt(r.s)+' to '+dfmt(r.e):'Show launch alert')+' \u2022 '+fmtT(r.t)+'</div><div class="mrow"><button class="btn gl" onclick="adMsgM(\''+r.mobile+'\')">Message</button></div></div>').join(''):'<div class="empty">No notify requests yet.<br>Get Notified sign-ups appear here.</div>';
+}
+function adMsgM(m){const s=students.find(x=>x.mobile===m);if(s)adMsg(s.id);else toast('No student profile with this mobile yet')}
+
+/* ---------- Home sections: backgrounds, documentary, events ---------- */
+const HB={"nye": "assets/asset18.jpg", "show": "assets/asset19.jpg", "araku": "assets/asset20.jpg"};HB.kerala=KR.hero;HB.manali=IMG.manali;
+const DOC={araku:'https://youtu.be/4E648bz2aR4?si=Qe0FUyAemndWasDa'}; /* confirm this is the Vizag & Araku documentary link */
+document.querySelectorAll('[data-bg]').forEach(e=>{e.style.backgroundImage='url('+HB[e.dataset.bg]+')'});
+$('dc-araku').href=DOC.araku;
+$('avid').src='assets/asset21.mp4';
+$('kvid').src='assets/asset22.mp4';
+function evtOpen(){
+  sheet('Students NYE 2027','The Biggest Students\u2019 New Year Party!\n\n31 Dec 2026 \u2022 Hyderabad\n\n\u2022 Live DJ\n\u2022 Dance floor\n\u2022 Food & drinks\n\u2022 Games & giveaways\n\u2022 Photo & video zone\n\nBigger vibes. Student community. Unforgettable night.','Notify me',()=>{
+    const s=meStu;notifyReqs.unshift({id:Date.now(),name:s?s.name:'Guest',mobile:s?s.mobile:'',mode:'',n:0,s:'',e:'',trip:'Students NYE 2027',sid:s&&s.id,t:Date.now()});
+    toast('We\u2019ll notify you about NYE 2027');
+  });
+}
+
+/* ---------- VibeMate ---------- */
+Object.assign(ICO,{home:'<path d="M3 11l9-8 9 8v10H3z"/><path d="M9 21v-6h6v6"/>',chat:'<path d="M21 12a8 8 0 01-11.5 7.2L3 21l1.8-5.5A8 8 0 1121 12z"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'});
+const VM_VIBES=['Travel Enthusiast','Party Person','Nature Lover','Adventure Seeker','Food Explorer','Photography Lover','Music Addict','Movie Buff','Introvert','Extrovert','Night Owl','Chill Person','Spiritual Explorer','Road Trip Lover','Fitness Enthusiast','Cultural Explorer'];
+const VM_HOB=['Travelling','Trekking','Photography','Dancing','Singing','Movies','Gaming','Music','Reading','Cafes','Parties','Exploring new places','Road trips','Making reels','Adventure activities'];
+const VM_LOOK=['Travel Buddy','Exploring Partner','Event / Party Buddy','New Friends','Hobby Partner','Open to Different Experiences'];
+const VM_REL=['Friendship First','Open to Meaningful Connections','Prefer Casual Friendships','Not Looking for Romantic Connections','Prefer Not to Say'];
+const VM_CAT=['Travel','College Life','Parties','Adventures','Events','Food','Nature','Personal Experiences'];
+const VM_YR=['1st year','2nd year','3rd year','4th year','5th year','PG 1st year','PG 2nd year'];
+const VM_EXP=[['24 hours',864e5],['7 days',6048e5],['Never',0]];
+const KEYARR={vibes:VM_VIBES,hob:VM_HOB,look:VM_LOOK};
+const VG=['linear-gradient(135deg,#0a6cff,#06214d)','linear-gradient(135deg,#4d96ff,#5a2bd9)','linear-gradient(135deg,#0a6cff,#00a99d)','linear-gradient(135deg,#1a2a6c,#4d96ff)','linear-gradient(135deg,#0b3a8c,#7fb0ff)'];
+const mkP=(id,anon,av,col,yr,mv,vibes,hob,look,bio,st)=>({id,anon,av,avImg:null,col,yr,mv,vibes,hob,look,bio,rel:'',relVis:'hidden',visible:true,paused:false,sample:true,sid:null,stories:st.map((s,i)=>({id:id+'s'+i,cat:s[0],cap:s[1],q:s[2]||'',img:null,g:i+id.length,t:Date.now(),exp:0}))});
+let vmProfiles=[
+ mkP('v1','WanderSoul','a:m6','University of Hyderabad','MBA 2nd Year','Peter Parker',['Travel Enthusiast','Introvert','Adventure Seeker'],['Travelling','Trekking','Photography'],['Travel Buddy','New Friends'],'Collecting moments, not things.',[['Travel','Sunrise from the hilltop. Worth the 4 AM alarm.'],['Nature','Found a hidden waterfall trail.','Get lost to find yourself']]),
+ mkP('v2','Midnight Explorer','a:m3','Andhra University','3rd year','Batman',['Night Owl','Photography Lover','Road Trip Lover'],['Road trips','Photography','Music'],['Travel Buddy','Exploring Partner'],'City lights hit different at 2 AM.',[['Adventures','Night ride to the beach and back.']]),
+ mkP('v3','Chai & Chill','a:f5','Osmania University','2nd year','Chandler Bing',['Chill Person','Food Explorer','Movie Buff'],['Cafes','Movies','Reading'],['New Friends','Hobby Partner'],'Chai first, plans later.',[['Food','Best filter coffee spot on campus.'],['College Life','Library naps are a lifestyle.']]),
+ mkP('v4','The Main Character','a:f2','Sample Arts College','4th year','Jack Sparrow',['Party Person','Extrovert','Music Addict'],['Dancing','Parties','Making reels'],['Event / Party Buddy','New Friends'],'Every day is a scene.',[['Parties','Fresher\u2019s night energy.'],['Events','Fest week highlights.']]),
+ mkP('v5','Lost in Vibes','a:f3','Sample Engineering College','1st year','Frodo Baggins',['Nature Lover','Spiritual Explorer','Introvert'],['Trekking','Reading','Exploring new places'],['Exploring Partner','Open to Different Experiences'],'Slow travel, loud thoughts.',[['Nature','Misty morning at the viewpoint.']])];
+let vmReq=[],vmConn=[],vmMsgs={},vmBlk=[],vmReports=[],vmStep=1,vmDraft=null,vmTab='explore',vmEditMode=false,vmFromSignup=false,vmJoin='later',vmChat=null,sv=null,svT=null;
+const myKey=()=>meStu?meStu.id:'guest';
+const vmMe=()=>vmProfiles.find(p=>!p.sample&&p.sid===myKey());
+const vp=id=>vmProfiles.find(p=>p.id===id);
+const alive=s=>!s.exp||Date.now()<s.t+s.exp;
+const tmf=t=>new Date(t).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'});
+const inter=(a,b)=>a.filter(x=>b.includes(x));
+const sharedOf=(p,m)=>({vibes:inter(p.vibes,m.vibes),hob:inter(p.hob,m.hob),look:inter(p.look,m.look)});
+const sharedN=(p,m)=>{const s=sharedOf(p,m);return s.vibes.length+s.hob.length+s.look.length};
+const isBlk=pid=>{const m=vmMe();return !!m&&vmBlk.some(b=>b.by===m.id&&b.t===pid)};
+const sentTo=pid=>{const m=vmMe();return vmReq.find(r=>r.from===m.id&&r.to===pid&&r.st!=='cancelled')};
+const recvFrom=pid=>{const m=vmMe();return vmReq.find(r=>r.from===pid&&r.to===m.id&&r.st==='pending')};
+const connOf=pid=>{const m=vmMe();return vmConn.find(c=>(c.a===m.id&&c.b===pid)||(c.b===m.id&&c.a===pid))};
+const avH=(p,cls,sty)=>'<div class="'+(cls||'vavb')+'" style="'+(sty||'')+(p.avImg?'background-image:url('+p.avImg+')':'')+'">'+(p.avImg?'':avInner(p.av))+'</div>';
+function vmN(p,txt){const m=vmMe();if(m&&p&&p.id===m.id&&meStu){notifs.unshift({id:Date.now()+Math.random(),to:meStu.id,title:'VibeMate',msg:txt,t:Date.now(),seen:{}});updateDot()}}
+const vjSet=k=>{vmJoin=k;$('vj-y').classList.toggle('on',k==='yes');$('vj-n').classList.toggle('on',k==='later')};
+const vpClose=()=>$('vpo').classList.remove('on');
+const readImg=(file,max)=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.78))};im.src=fr.result};fr.readAsDataURL(file)});
+function pickImgs(multi,max,cb){const i=document.createElement('input');i.type='file';i.accept='image/*';i.multiple=!!multi;i.onchange=async()=>{const out=[];for(const f of i.files)out.push(await readImg(f,max));if(out.length)cb(out)};i.click()}
+
+/* entry + onboarding */
+function openVM(){if(!vmMe()){vmFromSignup=false;vmStartOnboard(false)}else{vmTab='explore';vmRender();go('vm')}}
+function vmStartOnboard(edit,step){
+  const m=vmMe();
+  if(edit&&m){vmDraft=JSON.parse(JSON.stringify(m));vmEditMode=true;vmStep=step||1}
+  else{const v=id=>(($(id)&&$(id).value)||'').trim();vmDraft={anon:'',av:'a:m1',avImg:null,col:v('col'),yr:v('yr'),mv:'',bio:'',vibes:[],hob:[],look:[],rel:'',relVis:'hidden',stories:[]};vmEditMode=false;vmStep=1}
+  vmWiz();go('vmo');
+}
+const vmTog=(k,i,el)=>{const a=vmDraft[k],v=KEYARR[k][i],j=a.indexOf(v);j<0?a.push(v):a.splice(j,1);el.classList.toggle('on',j<0);const c=$('vcnt');if(c)c.textContent=a.length+' selected'};
+const chipsH=(k)=>'<div class="chips vchips">'+KEYARR[k].map((x,i)=>'<button class="chip vchip'+(vmDraft[k].includes(x)?' on':'')+'" onclick="vmTog(\''+k+'\','+i+',this)"><span>'+(EMJ[x]||'')+'</span> '+x+'</button>').join('')+'</div>';
+const thumbS=s=>s.img?'background-image:url('+s.img+')':'background:'+VG[s.g%5];
+function vliveH(){const d=vmDraft;return avH(d,'vavb','margin:0;width:56px;height:56px;font-size:30px;border-width:2px;')+'<div style="min-width:0"><b>'+esc(d.anon.trim()||'Your anonymous name')+'</b><div>\uD83C\uDFAC '+esc(d.mv.trim()||'Your movie character')+'</div></div>'}
+function vmLive(){const e=$('vlive');if(e)e.innerHTML=vliveH()}
+function vmWiz(){
+  const d=vmDraft,st=vmStep,T=['Your Identity','Your Vibe','Hobbies & Interests','Connection Preferences','Share Your Experiences'],SI=['user','star','heart','chat','gift'];
+  const hide=vmFromSignup&&!vmEditMode&&d.col&&d.yr;
+  const avBtn=a=>'<button class="vav'+(!d.avImg&&d.av==='a:'+a.id?' on':'')+'" onclick="vmDraft.av=\'a:'+a.id+'\';vmDraft.avImg=null;vmWiz()" aria-label="'+a.n+'"><div class="vavc">'+AVSVG[a.id]+'</div>'+a.n+'</button>';
+  let b='';
+  if(st===1)b='<div class="vpanel"><p class="vtt">Pick your filmi avatar</p><p class="vts">Original illustrations inspired by Indian cinema archetypes.</p>'
+   +'<div class="vsec" style="margin:6px 0">HEROES</div><div class="vag">'+AVS.filter(a=>a.id[0]==='m').map(avBtn).join('')+'</div><div class="vsec" style="margin:6px 0">HEROINES</div><div class="vag">'+AVS.filter(a=>a.id[0]==='f').map(avBtn).join('')+'</div>'
+   +'<button class="btn-s" style="width:100%;height:44px" onclick="vmUpAv()">'+(d.avImg?'Change your uploaded photo':'Or upload your own photo')+'</button></div>'
+   +'<div class="vpanel"><p class="vtt">Who are you here?</p><p class="vts">An anonymous name. Never your real name.</p>'
+   +'<div class="row"><input value="'+esc(d.anon)+'" maxlength="24" placeholder="e.g. WanderSoul" oninput="vmDraft.anon=this.value;vmLive()"><button class="btn-s" onclick="vmDraft.anon=VM_NAMES[Math.floor(Math.random()*5)];vmWiz()">Surprise me</button></div>'
+   +'<div class="chips vchips" style="margin-top:8px">'+VM_NAMES.map((x,i)=>'<button class="chip" onclick="vmDraft.anon=VM_NAMES['+i+'];vmWiz()">'+esc(x)+'</button>').join('')+'</div>'
+   +(hide?'<div class="note">Using your college and study year from your StudentDays sign-up.</div>':'<label>College name</label><input value="'+esc(d.col)+'" oninput="vmDraft.col=this.value"><label>Study year</label><select onchange="vmDraft.yr=this.value"><option value="">Select</option>'+VM_YR.map(x=>'<option'+(x===d.yr?' selected':'')+'>'+x+'</option>').join('')+'</select>')
+   +'<label>Movie character that matches your personality</label><input value="'+esc(d.mv)+'" placeholder="e.g. Peter Parker" oninput="vmDraft.mv=this.value;vmLive()"><label>Short bio or quote (optional)</label><textarea maxlength="140" oninput="vmDraft.bio=this.value">'+esc(d.bio)+'</textarea></div>';
+  if(st===2)b='<div class="vpanel"><p class="vtt">What\u2019s your vibe? \u2728</p><p class="vts">Pick all that fit you.</p>'+chipsH('vibes')+'<div class="vcnt" id="vcnt">'+d.vibes.length+' selected</div></div>';
+  if(st===3)b='<div class="vpanel"><p class="vtt">What do you love doing? \uD83C\uDFAF</p><p class="vts">Pick your hobbies and interests.</p>'+chipsH('hob')+'<div class="vcnt" id="vcnt">'+d.hob.length+' selected</div></div>';
+  if(st===4)b='<div class="vpanel"><p class="vtt">What kind of connection are you looking for? \uD83E\uDD1D</p><p class="vts">Choose all that apply.</p>'+chipsH('look')+'<div class="vcnt" id="vcnt">'+d.look.length+' selected</div></div>'
+   +'<div class="vpanel"><p class="vtt">Your view on relationships</p><p class="vts">Optional. VibeMate is about friends, travel buddies and shared experiences.</p><div class="chips vchips">'+VM_REL.map(x=>'<button class="chip vchip'+(d.rel===x?' on':'')+'" onclick="vmDraft.rel=vmDraft.rel===\''+x+'\'?\'\':\''+x+'\';vmWiz()">'+x+'</button>').join('')+'</div>'
+   +'<label>Who can see this</label><select onchange="vmDraft.relVis=this.value"><option value="hidden"'+(d.relVis==='hidden'?' selected':'')+'>Only me</option><option value="conn"'+(d.relVis==='conn'?' selected':'')+'>My connections</option><option value="all"'+(d.relVis==='all'?' selected':'')+'>Everyone on VibeMate</option></select></div>';
+  if(st===5)b='<div class="vpanel"><p class="vtt">Share your experiences \uD83D\uDCF8</p><p class="vts">Travel, events, parties, nature, college memories, quotes and short stories.</p>'
+   +'<div class="mrow" style="margin:0 0 12px"><button class="btn" onclick="vmAddPh()">Add photos</button><button class="btn" style="background:rgba(255,255,255,.12)" onclick="vmDraft.stories.push({id:\'s\'+Date.now(),cat:\'Personal Experiences\',cap:\'\',q:\'\',img:null,g:Math.floor(Math.random()*5),t:Date.now(),exp:6048e5});vmWiz()">Add quote or story</button></div>'
+   +(d.stories.length?d.stories.map((s,i)=>'<div class="lc2"><div class="vthumb" style="'+thumbS(s)+'"></div><div style="flex:1;min-width:0"><select onchange="vmDraft.stories['+i+'].cat=this.value">'+VM_CAT.map(c=>'<option'+(c===s.cat?' selected':'')+'>'+c+'</option>').join('')+'</select><input placeholder="Caption" maxlength="120" value="'+esc(s.cap)+'" oninput="vmDraft.stories['+i+'].cap=this.value"><input placeholder="Quote (optional)" maxlength="100" value="'+esc(s.q)+'" oninput="vmDraft.stories['+i+'].q=this.value"><select onchange="vmDraft.stories['+i+'].exp=+this.value">'+VM_EXP.map(e=>'<option value="'+e[1]+'"'+(e[1]===s.exp?' selected':'')+'>Expires: '+e[0]+'</option>').join('')+'</select></div><button class="px" style="position:static;flex:none" onclick="vmDraft.stories.splice('+i+',1);vmWiz()" aria-label="Remove">\u2715</button></div>').join(''):'<div class="empty" style="padding:16px">No photos or stories yet. You can add them later too.</div>')+'</div>'
+   +'<div class="vsec">YOUR VIBE CARD PREVIEW</div>'+vmCard(Object.assign({id:'preview',sample:false,paused:false,visible:true},d),{preview:true});
+  const hero=st===1&&!vmEditMode?'<div class="vhero"><div class="vfl">'+['m2','f1','m5','f4'].map((k,i)=>'<i style="--d:'+(i*.5)+'s">'+AVSVG[k]+'</i>').join('')+'</div><img class="vml big" src="'+VML+'" alt="VibeMate"><h1>Tell Us Your Vibe</h1><p>Let the world see your vibe, not your private identity.</p></div>':'';
+  const stepper=vmEditMode?'':'<div class="vstep">'+[1,2,3,4,5].map(i=>'<div class="vs '+(i<st?'done':i===st?'cur':'')+'"><span>'+(i<st?'\u2713':ic(SI[i-1],i===st?'#fff':'#7d8aa5',18))+'</span></div>'+(i<5?'<b class="'+(i<st?'on':'')+'"></b>':'')).join('')+'</div>';
+  $('vmo').innerHTML='<div class="hdr" style="margin-bottom:10px"><button class="back" onclick="vmWizBack()" aria-label="Back">&lsaquo;</button><div><p style="margin:0;font-size:13px;color:#9fb0d4">'+(vmEditMode?'Edit profile':'Step '+st+' of 5')+'</p><h1 style="font-size:20px">'+T[st-1]+'</h1></div></div>'
+   +hero+stepper+'<div class="vlive" id="vlive">'+vliveH()+'</div>'+b
+   +'<div class="spacer"></div><div class="mrow" style="margin-top:14px">'+(vmEditMode?'<button class="btn" style="background:rgba(255,255,255,.12)" onclick="go(\'vm\')">Cancel</button><button class="btn" onclick="vmSave()">Save changes</button>':(st>1?'<button class="btn" style="background:rgba(255,255,255,.12)" onclick="vmStep--;vmWiz()">Back</button>':'')+'<button class="btn" onclick="vmNext()">'+(st<5?'Next':'Create My Vibe Profile')+'</button>')+'</div>';
+  $('vmo').scrollTop=0;
+}
+function vmWizBack(){if(vmEditMode||vmStep===1){vmMe()?go('vm'):go('home')}else{vmStep--;vmWiz()}}
+function vmUpAv(){pickImgs(false,256,a=>{vmDraft.avImg=a[0];vmWiz()})}
+function vmAddPh(){pickImgs(true,720,a=>{a.forEach(u=>vmDraft.stories.push({id:'s'+Date.now()+Math.random(),cat:'Travel',cap:'',q:'',img:u,g:0,t:Date.now(),exp:6048e5}));vmWiz()})}
+function vmCheck1(){
+  const d=vmDraft,n=d.anon.trim();
+  if(!/^[\w &.'\-]{3,24}$/.test(n))return 'Use 3 to 24 letters, numbers or spaces for your anonymous name.';
+  if(BAD.test(n)||PII.test(n))return 'Choose a respectful name without contact details.';
+  const m=vmMe();
+  if(vmProfiles.some(p=>p.id!==(m&&m.id)&&p.anon.toLowerCase()===n.toLowerCase()))return 'That anonymous name is already taken.';
+  if(d.mv.trim().length<2)return 'Add the movie character that matches your personality.';
+  return '';
+}
+function vmNext(){
+  if(vmStep===1){const e=vmCheck1();if(e)return toast(e)}
+  if(vmStep<5){vmStep++;vmWiz()}else vmSave();
+}
+function vmSave(){
+  const e=vmCheck1();if(e){vmStep=1;vmWiz();return toast(e)}
+  const d=vmDraft;d.anon=d.anon.trim();d.mv=d.mv.trim();
+  let m=vmMe();
+  if(m){['anon','av','avImg','col','yr','mv','bio','vibes','hob','look','rel','relVis','stories'].forEach(k=>{m[k]=d[k]});toast('Profile updated');vmTab='me'}
+  else{
+    m=Object.assign({},d,{id:'v'+Date.now(),sid:myKey(),visible:true,paused:false,sample:false});vmProfiles.push(m);
+    ['v2','v3'].forEach((f,i)=>{vmReq.push({id:'r'+Date.now()+i,from:f,to:m.id,st:'pending',t:Date.now()});vmN(m,vp(f).anon+' sent you a Match the Vibe request')});
+    toast('Your VibeMate profile is ready');vmTab='explore';
+  }
+  vmEditMode=false;vmFromSignup=false;vmRender();go('vm');
+}
+
+/* cards */
+function vmCard(p,o){
+  o=o||{};const m=vmMe(),conn=m&&p.id!=='preview'&&p.id!==(m&&m.id)?connOf(p.id):null,live=p.stories.filter(alive);
+  const sh=m&&p.id!==m.id?sharedOf(p,m):{vibes:[],hob:[],look:[]},n=sh.vibes.length+sh.hob.length+sh.look.length;
+  const cov=live.find(s=>s.img);
+  const tg=(a,s,c)=>a.map(x=>'<span class="vt '+(c||'')+(s.includes(x)?' s':'')+'">'+esc(x)+'</span>').join('');
+  const showRel=p.rel&&(p.relVis==='all'||(p.relVis==='conn'&&conn)||o.preview);
+  let cta='';
+  if(!o.preview&&m&&p.id!==m.id){
+    const sent=sentTo(p.id),got=recvFrom(p.id);
+    cta=conn?'<button class="btn vcta" onclick="vpClose();vmOpenChat(\''+conn.id+'\')">Open chat</button>'
+      :sent?'<div class="mrow"><button class="btn vcta" style="background:rgba(255,255,255,.12)" disabled>Request Sent</button>'+(sent.st==='pending'||sent.st==='declined'?'<button class="btn gl2 vcta" style="background:rgba(255,255,255,.12)" onclick="vmCancel(\''+sent.id+'\')">Cancel</button>':'')+'</div>'
+      :got?'<button class="btn vcta" onclick="vpClose();vmTab=\'requests\';vmRender()">Respond in Requests</button>'
+      :'<button class="btn vcta" onclick="vmMatch(\''+p.id+'\')">Match the Vibe</button>';
+  }
+  return '<div class="vcard"><div class="vcov" style="'+(cov?'background-image:url('+cov.img+')':'background:'+VG[(p.anon.length)%5])+'">'+(p.sample?'<span class="vsmp">Sample profile</span>':'')+'</div>'+avH(p)
+   +'<div class="vbody"><h3>'+esc(p.anon||'Your anonymous name')+'</h3><div class="m">'+esc(p.col||'College')+' \u2022 '+esc(p.yr||'Year')+'</div><div class="m">\uD83C\uDFAC '+esc(p.mv||'Movie character')+'</div>'
+   +(n?'<div class="vmatch">Your Vibes Match \u2022 '+n+' shared interest'+(n>1?'s':'')+'</div>':'')
+   +'<div>'+tg(p.vibes,sh.vibes)+'</div><div>'+tg(p.hob,sh.hob,'h')+'</div><div class="m" style="margin-top:10px">Looking for</div><div>'+tg(p.look,sh.look)+'</div>'
+   +(showRel?'<div class="m" style="margin-top:10px">View on relationships: '+esc(p.rel)+'</div>':'')
+   +(p.bio?'<p class="vq">\u201C'+esc(p.bio)+'\u201D</p>':'')
+   +(live.length?'<div class="vph">'+live.map((s,i)=>'<div style="'+thumbS(s)+'" onclick="'+(o.preview?'':'vpClose();vmStory(\''+p.id+'\','+i+')')+'"><span>'+s.cat+'</span></div>').join('')+'</div>':'')
+   +cta+(!o.preview&&m&&p.id!==m.id?'<a class="lnk" style="margin-top:10px" onclick="vmPMenu(\''+p.id+'\')">Block or report</a>':'')+'</div></div>';
+}
+function vmPMenu(pid){const p=vp(pid);actions(p.anon,[['Block '+p.anon,()=>vmBlock(pid)],['Report '+p.anon,()=>vmReport(pid,'profile'),true]])}
+function vmReport(pid,ctx,sid){const p=vp(pid),m=vmMe();actions('Report '+p.anon,['Harassment or bullying','Inappropriate content','Fake or misleading profile','Sharing personal details','Something else'].map(x=>[x,()=>{vmReports.push({id:Date.now(),by:m.anon,pid,tname:p.anon,reason:x,ctx,sid:sid||null,t:Date.now()});toast('Reported. Our team will review it.')}]))}
+function vmBlock(pid){const m=vmMe(),p=vp(pid);vmBlk.push({by:m.id,t:pid});const c=connOf(pid);if(c){delete vmMsgs[c.id];vmConn=vmConn.filter(x=>x!==c)}vmReq.forEach(r=>{if(r.from===pid||r.to===pid)r.st='cancelled'});toast('Blocked '+p.anon);vpClose();vmRender()}
+
+/* requests */
+function vmMatch(pid){const p=vp(pid);sheet('Ready to Match the Vibe?','Send a connection request to '+p.anon+' and see if your vibes match.','Send Request',()=>vmSendReq(pid));$('ov-no').textContent='Cancel'}
+function vmSendReq(pid){
+  const m=vmMe();
+  if(isBlk(pid))return toast('You blocked this profile');
+  if(sentTo(pid))return toast('Request already sent');
+  if(recvFrom(pid))return toast('They already sent you a request. Check Requests.');
+  vmReq.push({id:'r'+Date.now(),from:m.id,to:pid,st:'pending',t:Date.now()});toast('Request sent');vpClose();vmRender();
+}
+function vmCancel(rid){const r=vmReq.find(x=>x.id===rid);r.st='cancelled';toast('Request cancelled');vmRender()}
+function vmAccept(rid){const r=vmReq.find(x=>x.id===rid),m=vmMe();r.st='accepted';const c={id:'c'+Date.now(),a:r.from,b:r.to,t:Date.now()};vmConn.push(c);vmMsgs[c.id]=[];vmN(m,'You are now connected with '+vp(r.from).anon);toast('Connected! Chat unlocked');vmRender()}
+function vmDecline(rid){vmReq.find(x=>x.id===rid).st='declined';vmRender()}
+function vmSimAccept(rid){const r=vmReq.find(x=>x.id===rid),m=vmMe();r.st='accepted';const c={id:'c'+Date.now(),a:r.from,b:r.to,t:Date.now()};vmConn.push(c);vmMsgs[c.id]=[];vmN(m,vp(r.to).anon+' accepted your request');vmN(m,'You are now connected with '+vp(r.to).anon);toast('Demo: request accepted');vmRender()}
+function vmView(pid){$('vpos').innerHTML='<button class="px" onclick="vpClose()" aria-label="Close">\u2715</button><div style="height:6px"></div>'+vmCard(vp(pid));$('vpo').classList.add('on')}
+function vmRequests(){
+  const m=vmMe(),rec=vmReq.filter(r=>r.to===m.id&&r.st==='pending'&&!isBlk(r.from)),snt=vmReq.filter(r=>r.from===m.id);
+  const stat=r=>r.st==='accepted'?['Accepted','completed']:r.st==='cancelled'?['Cancelled','cancelled']:['Pending','upcoming'];
+  return '<div class="vsec">RECEIVED REQUESTS</div>'+(rec.length?rec.map(r=>{const p=vp(r.from),s=sharedOf(p,m),sn=s.vibes.concat(s.hob,s.look);
+    return '<div class="vrq"><div class="top">'+avH(p)+'<div style="min-width:0"><b>'+esc(p.anon)+'</b>'+(p.sample?' <span class="vt h" style="margin:0">Sample</span>':'')+'<div class="m" style="font-size:13px;color:#a8b3c9">'+esc(p.col)+'</div></div></div>'
+    +(sn.length?'<div class="vmatch" style="margin-top:8px">Shared: '+sn.slice(0,4).map(esc).join(', ')+'</div>':'')+'<div>'+p.vibes.map(x=>'<span class="vt">'+esc(x)+'</span>').join('')+'</div>'+(p.bio?'<p class="vq">\u201C'+esc(p.bio)+'\u201D</p>':'')
+    +'<div class="mrow"><button class="btn" onclick="vmAccept(\''+r.id+'\')">Accept</button><button class="btn" style="background:rgba(255,255,255,.12)" onclick="vmDecline(\''+r.id+'\')">Decline</button></div><a class="lnk" onclick="vmView(\''+p.id+'\')">View Profile</a></div>'}).join(''):'<div class="empty" style="padding:20px">No received requests.</div>')
+  +'<div class="vsec">SENT REQUESTS</div>'+(snt.length?snt.map(r=>{const p=vp(r.to),s=stat(r),c=connOf(p.id);
+    return '<div class="vrq"><div class="top">'+avH(p)+'<div style="flex:1;min-width:0"><b>'+esc(p.anon)+'</b><div class="m" style="font-size:13px;color:#a8b3c9">'+esc(p.col)+'</div></div><span class="st '+s[1]+'">'+s[0]+'</span></div>'
+    +(r.st==='accepted'&&c?'<div class="mrow"><button class="btn" onclick="vmOpenChat(\''+c.id+'\')">Open chat</button></div>':'')
+    +((r.st==='pending'||r.st==='declined')?'<div class="mrow"><button class="btn" style="background:rgba(255,255,255,.12)" onclick="vmCancel(\''+r.id+'\')">Cancel request</button></div>'+(p.sample&&r.st==='pending'?'<a class="lnk" onclick="vmSimAccept(\''+r.id+'\')">Demo only: simulate they accept</a>':''):'')+'</div>'}).join(''):'<div class="empty" style="padding:20px">No sent requests. Tap Match the Vibe on a profile.</div>');
+}
+
+/* main screen */
+function vmRender(){
+  const m=vmMe();if(!m)return;
+  const rc=vmReq.filter(r=>r.to===m.id&&r.st==='pending'&&!isBlk(r.from)).length;
+  const T={explore:['Discover Your Vibe','Your next adventure might start with a match.'],requests:['Discover Your Vibe','Your next adventure might start with a match.'],chats:['Your Vibe Connections','Chat with students you have matched with.'],me:['My Vibe','Your profile, stories and privacy.']}[vmTab];
+  let b='';
+  if(vmTab==='explore'){const l=vmProfiles.filter(p=>p.id!==m.id&&p.visible&&!p.paused&&!isBlk(p.id)).map(p=>({p,n:sharedN(p,m)+(p.col&&p.col===m.col?.5:0)})).sort((a,c)=>c.n-a.n).map(x=>x.p);b=(l.length?l.map(p=>vmCard(p)).join(''):'<div class="empty">No profiles to show yet.</div>')+'<p class="hint" style="text-align:center">Sample profiles are shown for preview. Real students appear as they join.</p>'}
+  if(vmTab==='requests')b=vmRequests();
+  if(vmTab==='chats'){b=vmConn.filter(c=>c.a===m.id||c.b===m.id).map(c=>{const p=vp(c.a===m.id?c.b:c.a),ms=vmMsgs[c.id]||[],l=ms[ms.length-1];return '<div class="vrq" style="cursor:pointer" onclick="vmOpenChat(\''+c.id+'\')"><div class="top">'+avH(p)+'<div style="min-width:0;flex:1"><b>'+esc(p.anon)+'</b><div class="m" style="font-size:13px;color:#a8b3c9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(l?(l.img?'Photo':esc(l.txt)):'Say hi \uD83D\uDC4B')+'</div></div></div></div>'}).join('')||'<div class="empty">No connections yet.<br>Accepted requests unlock chat.</div>'}
+  if(vmTab==='me'){
+    const rows=[['Edit Anonymous Name','user',()=>'vmEdit(1)'],['Edit Vibe','star',()=>'vmEdit(2)'],['Edit Hobbies','heart',()=>'vmEdit(3)'],['Edit College / Study Year','pin',()=>'vmEdit(1)'],['Edit Connection Preferences','chat',()=>'vmEdit(4)'],['Manage Photos','gift',()=>'vmEdit(5)'],['Manage Stories','tag',()=>'vmStories()'],['Privacy Settings','gear',()=>'vmPrivacy()'],['Blocked Users','user',()=>'vmBlockedList()']];
+    b=vmCard(m,{preview:true})+'<div class="vsec">SETTINGS</div>'+rows.map(r=>'<div class="vrow" onclick="'+r[2]()+'">'+ic(r[1],'#4d96ff',22)+'<span>'+r[0]+'</span><i>\u203A</i></div>').join('')
+     +'<div class="vrow" onclick="vmPause()">'+ic('gear','#4d96ff',22)+'<span>'+(m.paused?'Resume Profile':'Pause Profile')+'</span><i>'+(m.paused?'Paused':'Visible')+'</i></div><div class="vrow" onclick="vmDelete()" style="color:#ff8f84">'+ic('user','#ff8f84',22)+'<span>Delete VibeMate Profile</span></div>'
+     +'<p class="hint">Your real name, phone number, email and StudentDays ID are never shown to other students.</p>';
+  }
+  const nav=[['home','Home',()=>"go('home')",'home'],['explore','Explore',()=>"vmGo('explore')",'trip'],['requests','Requests',()=>"vmGo('requests')",'mail'],['chats','Chats',()=>"vmGo('chats')",'chat'],['me','My Vibe',()=>"vmGo('me')",'user']];
+  $('vm').innerHTML='<div class="vm-h"><div style="display:flex;gap:12px;align-items:center"><button class="back" onclick="go(\'home\')" aria-label="Back">&lsaquo;</button><div><h1><img class="vml" src="'+VML+'" alt=""> '+T[0]+'</h1><p>'+T[1]+'</p></div></div><button class="back" onclick="openNotifs()" aria-label="Notifications">'+ic('mail','#fff',20)+'</button></div>'
+   +((vmTab==='explore'||vmTab==='requests')?'<div class="seg vseg"><button class="'+(vmTab==='explore'?'on':'')+'" onclick="vmGo(\'explore\')">Explore</button><button class="'+(vmTab==='requests'?'on':'')+'" onclick="vmGo(\'requests\')">Requests'+(rc?' ('+rc+')':'')+'</button></div>':'')
+   +'<div class="vscroll" id="vms">'+b+'</div><nav class="vnav">'+nav.map(x=>'<button class="'+(vmTab===x[0]?'on':'')+'" onclick="'+x[2]()+'">'+ic(x[3],'#bbb',22)+x[1]+(x[0]==='requests'&&rc?'<span class="vb">'+rc+'</span>':'')+'</button>').join('')+'</nav>';
+  $('vm').style.display='';
+}
+const vmGo=t=>{vmTab=t;vmRender();go('vm')};
+const vmEdit=s=>vmStartOnboard(true,s);
+function vmPause(){const m=vmMe();m.paused=!m.paused;toast(m.paused?'Profile paused':'Profile visible again');vmRender()}
+function vmDelete(){sheet('Delete your VibeMate profile?','Your profile, stories, requests and chats will be removed. This cannot be undone.','Delete',()=>{const m=vmMe();vmProfiles=vmProfiles.filter(p=>p!==m);vmReq=vmReq.filter(r=>r.from!==m.id&&r.to!==m.id);vmConn.filter(c=>c.a===m.id||c.b===m.id).forEach(c=>delete vmMsgs[c.id]);vmConn=vmConn.filter(c=>c.a!==m.id&&c.b!==m.id);toast('VibeMate profile deleted');go('home')})}
+function vmStories(){
+  const m=vmMe();
+  $('vpos').innerHTML='<button class="px" onclick="vpClose()" aria-label="Close">\u2715</button><h2>Manage stories</h2>'+(m.stories.length?m.stories.map((s,i)=>'<div class="lc2" style="margin-top:10px"><div class="vthumb" style="'+thumbS(s)+'"></div><div style="flex:1;min-width:0"><b>'+s.cat+'</b><div class="m" style="font-size:13px;color:#a8b3c9">'+esc(s.cap||s.q||'No caption')+'</div><div class="m" style="font-size:12px;color:#7db3ff">'+(s.exp?(alive(s)?'Expires '+fmtT(s.t+s.exp):'Expired'):'Never expires')+'</div></div><button class="btn gl2" style="padding:8px 12px;font-size:13px;background:rgba(255,255,255,.12)" onclick="vmDelStory('+i+')">Delete</button></div>').join(''):'<div class="empty">No stories yet.</div>')+'<button class="btn" style="width:100%;margin-top:14px" onclick="vpClose();vmEdit(5)">Add photos or stories</button>';
+  $('vpo').classList.add('on');
+}
+function vmDelStory(i){vmMe().stories.splice(i,1);vmStories();vmRender()}
+function vmPrivacy(){
+  const m=vmMe();
+  $('vpos').innerHTML='<button class="px" onclick="vpClose()" aria-label="Close">\u2715</button><h2>Privacy settings</h2>'
+  +'<label>Profile visibility</label><select onchange="vmMe().visible=this.value===\'1\';vmRender()"><option value="1"'+(m.visible?' selected':'')+'>Visible to other VibeMate students</option><option value="0"'+(m.visible?'':' selected')+'>Hidden from Explore</option></select>'
+  +'<label>Relationship view shown to</label><select onchange="vmMe().relVis=this.value"><option value="hidden"'+(m.relVis==='hidden'?' selected':'')+'>Only me</option><option value="conn"'+(m.relVis==='conn'?' selected':'')+'>My connections</option><option value="all"'+(m.relVis==='all'?' selected':'')+'>Everyone</option></select>'
+  +'<div class="note"><b>Always private:</b> real name, phone number, email, StudentDays login and internal profile ID. Others only see your anonymous name.</div>';
+  $('vpo').classList.add('on');
+}
+function vmBlockedList(){
+  const m=vmMe(),l=vmBlk.filter(b=>b.by===m.id);
+  $('vpos').innerHTML='<button class="px" onclick="vpClose()" aria-label="Close">\u2715</button><h2>Blocked users</h2>'+(l.length?l.map(b=>{const p=vp(b.t);return '<div class="vrow" style="cursor:default;margin-top:10px">'+avH(p,'vavb','margin:0;width:40px;height:40px;font-size:22px;border-width:2px;')+'<span>'+esc(p.anon)+'</span><button class="btn gl2" style="padding:8px 14px;font-size:13px;background:rgba(255,255,255,.12)" onclick="vmUnblock(\''+b.t+'\')">Unblock</button></div>'}).join(''):'<div class="empty">No blocked users.</div>');
+  $('vpo').classList.add('on');
+}
+function vmUnblock(pid){const m=vmMe();vmBlk=vmBlk.filter(b=>!(b.by===m.id&&b.t===pid));vmBlockedList();vmRender()}
+
+/* chat */
+const REPLIES=['Haha same here!','That sounds fun, tell me more','I\u2019m in for a trip like that','Which place is next on your list?','Love that vibe'];
+function vmOpenChat(cid){vmChat=cid;vmChatRender();go('vmc')}
+const bubM=m=>'<div class="bw'+(m.me?' me':'')+'" onclick="vmReact(\''+m.id+'\')"><div class="bb">'+(m.img?'<img class="mimg" src="'+m.img+'" alt="Shared photo">':'')+esc(m.txt||'')+'<span class="mt">'+tmf(m.t)+(m.me?(m.read?' \u2713\u2713':' \u2713'):'')+'</span>'+(m.react?'<span class="rx">'+m.react+'</span>':'')+'</div></div>';
+function vmChatRender(){
+  const m=vmMe(),c=vmConn.find(x=>x.id===vmChat),p=vp(c.a===m.id?c.b:c.a),ms=vmMsgs[c.id]||[];
+  $('vmc').innerHTML='<div class="hdr" style="margin-bottom:8px"><button class="back" onclick="vmGo(\'chats\')" aria-label="Back">&lsaquo;</button>'+avH(p,'vavb','margin:0;width:40px;height:40px;font-size:22px;border-width:2px;')+'<div style="flex:1;min-width:0"><h1 style="font-size:19px">'+esc(p.anon)+'</h1><p>Vibe connection</p></div><button class="back" onclick="vmChatMenu()" aria-label="Options">\u22EF</button></div>'
+   +'<div class="msgs" id="vml">'+(ms.length?ms.map(bubM).join(''):'<div class="empty">You matched! Say hi.</div>')+'<div id="vtp" class="hint" style="padding-left:6px"></div></div>'
+   +'<div class="cin"><button class="back" style="width:44px;height:44px;flex:none" onclick="vmChatImg()" aria-label="Share photo">'+ic('gift','#fff',20)+'</button><input id="vmi" maxlength="300" placeholder="Message" onkeydown="if(event.key===\'Enter\')vmChatSend()"><button class="btn-s" onclick="vmChatSend()">Send</button></div>';
+  const l=$('vml');l.scrollTop=l.scrollHeight;
+}
+function vmPush(m,cid){vmMsgs[cid].push(m);if(vmChat===cid&&$('vmc').classList.contains('on')){const l=$('vml');if(l.querySelector('.empty'))vmChatRender();else{$('vtp').insertAdjacentHTML('beforebegin',bubM(m))}const x=$('vml');x.scrollTop=x.scrollHeight}}
+function vmReplyLater(cid,p){
+  const tp=()=>{if(vmChat===cid&&$('vtp'))$('vtp').textContent=p.anon+' is typing\u2026'};
+  setTimeout(tp,500);
+  setTimeout(()=>{if(!vmConn.find(x=>x.id===cid))return;if(vmChat===cid&&$('vtp'))$('vtp').textContent='';(vmMsgs[cid]||[]).forEach(x=>{if(x.me)x.read=true});
+    vmPush({id:'m'+Date.now(),me:false,txt:REPLIES[Math.floor(Math.random()*REPLIES.length)],t:Date.now()},cid);
+    if(vmChat!==cid||!$('vmc').classList.contains('on'))vmN(vmMe(),'New message from '+p.anon);else vmChatRender()},1700);
+}
+function vmChatSend(){
+  const i=$('vmi'),t=i.value.trim();if(!t)return;
+  if(PII.test(t))return toast('Don\u2019t share phone numbers or email addresses');
+  if(BAD.test(t))return toast('Message blocked. Keep it respectful.');
+  const m=vmMe(),c=vmConn.find(x=>x.id===vmChat),p=vp(c.a===m.id?c.b:c.a);
+  i.value='';vmPush({id:'m'+Date.now(),me:true,txt:t,t:Date.now(),read:false},c.id);vmReplyLater(c.id,p);
+}
+function vmChatImg(){pickImgs(false,640,a=>{const m=vmMe(),c=vmConn.find(x=>x.id===vmChat),p=vp(c.a===m.id?c.b:c.a);vmPush({id:'m'+Date.now(),me:true,img:a[0],txt:'',t:Date.now(),read:false},c.id);vmReplyLater(c.id,p)})}
+function vmReact(mid){const c=vmChat,m=(vmMsgs[c]||[]).find(x=>x.id===mid);if(!m)return;actions('React',['\uD83D\uDC4D','\u2764\uFE0F','\uD83D\uDE02','\uD83D\uDD25','\uD83D\uDE2E','Remove'].map(e=>[e,()=>{m.react=e==='Remove'?'':e;vmChatRender()}]))}
+function vmChatMenu(){
+  const m=vmMe(),c=vmConn.find(x=>x.id===vmChat),pid=c.a===m.id?c.b:c.a,p=vp(pid);
+  actions(p.anon,[['Unmatch / Disconnect',()=>sheet('Disconnect from '+p.anon+'?','This ends the chat for both of you.','Disconnect',()=>{vmReq.forEach(r=>{if((r.from===pid||r.to===pid)&&r.st==='accepted')r.st='cancelled'});delete vmMsgs[c.id];vmConn=vmConn.filter(x=>x!==c);toast('Disconnected');vmGo('chats')})],['Block '+p.anon,()=>{vmBlock(pid);vmGo('chats')}],['Report '+p.anon,()=>vmReport(pid,'chat'),true]]);
+}
+
+/* stories viewer */
+function vmStory(pid,i){const p=vp(pid),arr=p.stories.filter(alive);if(!arr.length)return;sv={pid,arr,i:i||0};svRender()}
+function svRender(){
+  clearTimeout(svT);const s=sv.arr[sv.i],p=vp(sv.pid),m=vmMe(),own=m&&p.id===m.id;
+  $('svw').innerHTML='<div class="svbg" style="'+(s.img?'background-image:url('+s.img+')':'background:'+VG[s.g%5])+'"></div>'
+   +'<div class="svt"><div class="svp">'+sv.arr.map((_,k)=>'<i class="'+(k<sv.i?'d':k===sv.i?'a':'')+'"></i>').join('')+'</div><div class="svh">'+avH(p)+'<b>'+esc(p.anon)+'</b><span>'+s.cat+(own&&s.exp?' \u2022 expires '+fmtT(s.t+s.exp):'')+'</span><button onclick="svClose()" aria-label="Close">\u2715</button></div></div>'
+   +'<div class="svz" onclick="svNav(-1)"></div><div class="svz r" onclick="svNav(1)"></div>'
+   +'<div class="svc">'+(s.q?'<p class="q">\u201C'+esc(s.q)+'\u201D</p>':'')+(s.cap?'<p>'+esc(s.cap)+'</p>':'')+'</div>'
+   +'<div class="sva">'+(own?'<button class="btn" onclick="svDel()">Delete story</button>':(p.sample||!own?'<button class="btn" style="background:rgba(255,255,255,.14)" onclick="svReport()">Report story</button>':''))+'</div>';
+  $('svw').classList.add('on');svT=setTimeout(()=>svNav(1),5000);
+}
+function svNav(d){sv.i+=d;if(sv.i<0)sv.i=0;if(sv.i>=sv.arr.length)return svClose();svRender()}
+function svClose(){clearTimeout(svT);$('svw').classList.remove('on');sv=null}
+function svDel(){const p=vp(sv.pid),s=sv.arr[sv.i];p.stories=p.stories.filter(x=>x!==s);sv.arr.splice(sv.i,1);toast('Story deleted');if(!sv.arr.length){svClose();vmRender();return}if(sv.i>=sv.arr.length)sv.i=sv.arr.length-1;svRender();vmRender()}
+function svReport(){clearTimeout(svT);const s=sv.arr[sv.i],pid=sv.pid;svClose();vmReport(pid,'story',s.id)}
+
+/* admin view */
+function adVibe(){
+  const real=vmProfiles.filter(p=>!p.sample);
+  return '<h3 style="margin:0 0 8px">Profiles</h3>'+(real.length?real.map(p=>'<div class="lc adc"><div class="rt"><b>'+esc(p.anon)+'</b>'+chip(p.paused?'paused':'active',p.paused?'r':'g')+'</div><div class="m">Linked student: '+esc(stuName(p.sid))+' \u2022 '+esc(p.col||'-')+' \u2022 '+esc(p.yr||'-')+'</div><div class="m">'+p.vibes.length+' vibes \u2022 '+p.hob.length+' hobbies \u2022 '+p.stories.length+' stories</div><div class="mrow"><button class="btn gl" onclick="adVm(\''+p.id+'\',\'p\')">'+(p.paused?'Unpause':'Pause')+'</button><button class="btn gl" onclick="adVm(\''+p.id+'\',\'d\')">Remove</button></div></div>').join(''):'<div class="lc adc"><p class="m" style="margin:0">No VibeMate profiles yet.</p></div>')
+  +'<h3 style="margin:18px 0 8px">Reports</h3>'+(vmReports.length?vmReports.map((r,i)=>'<div class="lc adc"><div class="rt"><b>'+esc(r.tname)+'</b>'+chip(r.ctx,'r')+'</div><div class="m">'+esc(r.reason)+' \u2022 reported by '+esc(r.by)+' \u2022 '+fmtT(r.t)+'</div><div class="mrow"><button class="btn gl" onclick="vmReports.splice('+i+',1);adRender()">Dismiss</button><button class="btn gl" onclick="adVm(\''+r.pid+'\',\'p\');vmReports.splice('+i+',1);adRender()">Pause profile</button></div></div>').join(''):'<div class="lc adc"><p class="m" style="margin:0">No reports.</p></div>');
+}
+function adVm(pid,a){const p=vp(pid);if(!p)return adRender();if(a==='p')p.paused=!p.paused;else vmProfiles=vmProfiles.filter(x=>x!==p);adRender()}
+
+/* ---------- VibeMate illustrated avatars (original artwork) ---------- */
+const SKD={'#f6d2b0':'#e6b88e','#e3ac7e':'#cf935f','#c58b5a':'#ab7144','#8f5d3b':'#794a2c'};
+function mkAv(c){
+  const sk=c.skin,sd=SKD[sk],hr=c.hair,id='ag'+c.id;
+  const HS={
+    short:['',`<path d="M29 44Q27 19 50 18Q73 19 71 44Q66 31 50 30Q34 31 29 44Z" fill="${hr}"/>`],
+    quiff:['',`<path d="M29 44Q27 19 50 18Q73 19 71 44Q66 31 50 30Q34 31 29 44Z" fill="${hr}"/><ellipse cx="55" cy="18" rx="15" ry="8" fill="${hr}"/>`],
+    curly:['',`<g fill="${hr}"><circle cx="31" cy="30" r="9"/><circle cx="41" cy="22" r="10"/><circle cx="53" cy="20" r="10"/><circle cx="64" cy="25" r="10"/><circle cx="70" cy="35" r="8"/></g>`],
+    long:[`<path d="M25 46Q21 82 33 94L67 94Q79 82 75 46Q73 17 50 17Q27 17 25 46Z" fill="${hr}"/>`,`<path d="M29 41Q34 24 50 24Q66 24 71 41Q60 31 50 32Q39 31 29 41Z" fill="${hr}"/>`],
+    bob:[`<path d="M26 58Q22 17 50 17Q78 17 74 58L74 68Q70 66 69 58L31 58Q30 66 26 68Z" fill="${hr}"/>`,`<path d="M29 42Q34 25 50 25Q66 25 71 42Q60 33 50 34Q39 33 29 42Z" fill="${hr}"/>`],
+    bun:['',`<path d="M29 44Q27 19 50 18Q73 19 71 44Q66 31 50 30Q34 31 29 44Z" fill="${hr}"/><circle cx="50" cy="13" r="8" fill="${hr}"/>`],
+    pony:['',`<path d="M29 44Q27 19 50 18Q73 19 71 44Q66 31 50 30Q34 31 29 44Z" fill="${hr}"/><path d="M69 28Q90 34 83 68Q80 50 68 40Z" fill="${hr}"/>`]
+  }[c.hs];
+  const a=c.acc||[],has=k=>a.includes(k);
+  const eyes=has('sun')?'':`<ellipse cx="42" cy="46" rx="2.4" ry="3" fill="#222"/><ellipse cx="58" cy="46" rx="2.4" ry="3" fill="#222"/>`;
+  const brows=`<path d="M37 40Q42 37 47 40M53 40Q58 37 63 40" stroke="${hr}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  const mouth=`<path d="M43 56Q50 63 57 56" stroke="${c.lip||'#7a2e2e'}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+  let acc='';
+  if(has('beard'))acc+=`<path d="M31 52Q32 71 50 73Q68 71 69 52Q64 63 50 63Q36 63 31 52Z" fill="${hr}" opacity=".9"/>`;
+  if(has('mus'))acc+=`<path d="M41 54Q46 50 50 53Q54 50 59 54Q54 57 50 55Q46 57 41 54Z" fill="${hr}"/>`;
+  if(has('sun'))acc+=`<rect x="33" y="41" width="15" height="9" rx="4" fill="#111"/><rect x="52" y="41" width="15" height="9" rx="4" fill="#111"/><path d="M48 45h4" stroke="#111" stroke-width="2"/>`;
+  if(has('specs'))acc+=`<circle cx="42" cy="46" r="6" fill="rgba(255,255,255,.25)" stroke="#2b2b2b" stroke-width="1.8"/><circle cx="58" cy="46" r="6" fill="rgba(255,255,255,.25)" stroke="#2b2b2b" stroke-width="1.8"/><path d="M48 46h4" stroke="#2b2b2b" stroke-width="1.8"/>`;
+  if(has('bindi'))acc+=`<circle cx="50" cy="35" r="2.2" fill="#e11d48"/>`;
+  if(has('jhumka'))acc+=`<g fill="#f5b301"><circle cx="30" cy="54" r="2.4"/><path d="M27.5 56h5l-2.5 7z"/><circle cx="70" cy="54" r="2.4"/><path d="M67.5 56h5l-2.5 7z"/></g>`;
+  if(has('flower'))acc+=`<g fill="#ff7aa8"><circle cx="66" cy="26" r="4.2"/><circle cx="72" cy="31" r="4.2"/><circle cx="62" cy="32" r="4.2"/></g><circle cx="67" cy="29.5" r="2.6" fill="#ffd54a"/>`;
+  if(has('band'))acc+=`<path d="M28 35Q50 24 72 35" stroke="#ef4444" stroke-width="4" fill="none"/>`;
+  if(has('cap'))acc+=`<path d="M27 37Q28 15 50 15Q72 15 73 37Z" fill="#0a6cff"/><path d="M58 35Q82 34 85 41L58 41Z" fill="#06214d"/>`;
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${c.n}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c.bg[0]}"/><stop offset="1" stop-color="${c.bg[1]}"/></linearGradient></defs><rect width="100" height="100" fill="url(#${id})"/>${HS[0]}<path d="M8 100Q12 72 50 70Q88 72 92 100Z" fill="${c.shirt}"/><rect x="42" y="58" width="16" height="16" rx="6" fill="${sd}"/><circle cx="30" cy="48" r="4" fill="${sk}"/><circle cx="70" cy="48" r="4" fill="${sk}"/><ellipse cx="50" cy="46" rx="20" ry="23" fill="${sk}"/>${eyes}${brows}${mouth}${HS[1]}${acc}</svg>`;
+}
+const AVS=[
+ {id:'m1',n:'The Dreamer',skin:'#e3ac7e',hair:'#2b2118',hs:'short',acc:['specs'],shirt:'#0a6cff',bg:['#cfe0ff','#8fb6ff']},
+ {id:'m2',n:'Masala Hero',skin:'#c58b5a',hair:'#1a1410',hs:'quiff',acc:['sun','mus'],shirt:'#111827',bg:['#ffe0b8','#ffab5e']},
+ {id:'m3',n:'Rockstar',skin:'#f6d2b0',hair:'#3a2a1c',hs:'long',acc:['band','beard'],shirt:'#4d96ff',bg:['#d9e6ff','#a7c4ff']},
+ {id:'m4',n:'Chill Bro',skin:'#8f5d3b',hair:'#15110e',hs:'short',acc:['cap'],shirt:'#ffffff',bg:['#c9f0ec','#7fd6cf']},
+ {id:'m5',n:'Gentleman',skin:'#e3ac7e',hair:'#241a12',hs:'short',acc:['mus'],shirt:'#1e3a8a',bg:['#e3dcff','#b8a8ff']},
+ {id:'m6',n:'Wanderer',skin:'#c58b5a',hair:'#1c140e',hs:'curly',acc:['beard'],shirt:'#0f766e',bg:['#d7efff','#8fd0ff']},
+ {id:'f1',n:'Drama Queen',skin:'#e3ac7e',hair:'#1b130e',hs:'long',acc:['bindi','jhumka'],shirt:'#be185d',lip:'#c2185b',bg:['#ffd6e6','#ff9fc4']},
+ {id:'f2',n:'Desi Diva',skin:'#f6d2b0',hair:'#2a1b12',hs:'bun',acc:['sun','jhumka'],shirt:'#0a6cff',lip:'#d6336c',bg:['#d3e4ff','#8fb6ff']},
+ {id:'f3',n:'Free Spirit',skin:'#c58b5a',hair:'#140e0b',hs:'long',acc:['flower'],shirt:'#7c3aed',lip:'#c2185b',bg:['#e8dcff','#bfa3ff']},
+ {id:'f4',n:'Dancing Star',skin:'#e3ac7e',hair:'#1a120d',hs:'pony',acc:['bindi'],shirt:'#0891b2',lip:'#d6336c',bg:['#d0f2ff','#8fdcff']},
+ {id:'f5',n:'Bookworm',skin:'#8f5d3b',hair:'#0f0a08',hs:'bob',acc:['specs'],shirt:'#1e40af',lip:'#b71c5c',bg:['#e0ecff','#a9c6ff']},
+ {id:'f6',n:'Trekker',skin:'#f6d2b0',hair:'#3b2a1a',hs:'pony',acc:['cap'],shirt:'#0ea5e9',lip:'#d6336c',bg:['#dcfce7','#86efac']}];
+const AVSVG={};AVS.forEach(a=>{AVSVG[a.id]=mkAv(a)});
+const avInner=a=>a&&String(a).startsWith('a:')?(AVSVG[String(a).slice(2)]||''):a;
+const VM_NAMES=['Midnight Explorer','WanderSoul','Chai & Chill','The Main Character','Lost in Vibes'];
+const EMJ={'Travel Enthusiast':'\u2708\uFE0F','Party Person':'\uD83C\uDF89','Nature Lover':'\uD83C\uDF3F','Adventure Seeker':'\uD83E\uDDD7','Food Explorer':'\uD83C\uDF5C','Photography Lover':'\uD83D\uDCF8','Music Addict':'\uD83C\uDFA7','Movie Buff':'\uD83C\uDFAC','Introvert':'\uD83D\uDCDA','Extrovert':'\uD83D\uDDE3\uFE0F','Night Owl':'\uD83E\uDD89','Chill Person':'\uD83D\uDE0E','Spiritual Explorer':'\uD83E\uDDD8','Road Trip Lover':'\uD83D\uDE97','Fitness Enthusiast':'\uD83D\uDCAA','Cultural Explorer':'\uD83C\uDFDB\uFE0F',
+ 'Travelling':'\uD83E\uDDF3','Trekking':'\uD83E\uDD7E','Photography':'\uD83D\uDCF7','Dancing':'\uD83D\uDC83','Singing':'\uD83C\uDFA4','Movies':'\uD83C\uDF7F','Gaming':'\uD83C\uDFAE','Music':'\uD83C\uDFB5','Reading':'\uD83D\uDCD6','Cafes':'\u2615','Parties':'\uD83E\uDEA9','Exploring new places':'\uD83D\uDDFA\uFE0F','Road trips':'\uD83D\uDEE3\uFE0F','Making reels':'\uD83D\uDCF1','Adventure activities':'\uD83E\uDE82',
+ 'Travel Buddy':'\uD83E\uDDED','Exploring Partner':'\uD83D\uDD2D','Event / Party Buddy':'\uD83C\uDF9F\uFE0F','New Friends':'\uD83E\uDD1D','Hobby Partner':'\uD83C\uDFAF','Open to Different Experiences':'\u2728'};
+
+/* ---------- Razorpay payments ---------- */
+/* Set enabled:true, your PUBLIC Key ID and your backend URL after deploying razorpay-backend.
+   NEVER put the Key Secret in this file. The browser cannot load checkout.js inside the Claude preview, so test on your own domain. */
+const PAY_CFG={enabled:false,keyId:'',apiBase:'',name:'StudentDays.co'};
+const loadRzp=()=>window.Razorpay?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://checkout.razorpay.com/v1/checkout.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});
+const postJ=(u,b)=>fetch(PAY_CFG.apiBase+u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()});
+async function payNow(p){
+  if(!PAY_CFG.enabled)return{ok:true,demo:true};            // prototype: no real charge, no real booking proof
+  try{
+    await loadRzp();
+    const o=await postJ('/api/payments/order',{item:p.item,qty:p.qty,studentId:meStu&&meStu.id}); // server decides the amount
+    return await new Promise(res=>{
+      const rz=new Razorpay({key:PAY_CFG.keyId,amount:o.amount,currency:o.currency,name:PAY_CFG.name,description:p.desc,order_id:o.id,prefill:{name:p.name||'',contact:p.mobile||''},theme:{color:'#0a6cff'},
+        handler:async r=>{try{const v=await postJ('/api/payments/verify',r);res(v.verified?{ok:true,paymentId:r.razorpay_payment_id,orderId:r.razorpay_order_id}:{ok:false,msg:'We could not verify the payment. If money was deducted it will be refunded.'})}catch(e){res({ok:false,msg:'Verification failed. If money was deducted, contact support.'})}},
+        modal:{ondismiss:()=>res({ok:false,msg:'Payment cancelled. Nothing was charged.'})}});
+      rz.on('payment.failed',x=>res({ok:false,msg:(x.error&&x.error.description)||'Payment failed. Nothing was charged.'}));
+      rz.open();
+    });
+  }catch(e){return{ok:false,msg:'Payment service is unavailable. Please try again.'}}
+}
+
+const VML=document.querySelector('.vmh-l').src;
+startIntro();
+</script>
+<script>
+/* --- native bridge: hardware back button + status bar --- */
+(function(){
+  var cap=window.Capacitor; if(!cap||!cap.Plugins) return;
+  var App=cap.Plugins.App;
+  if(App&&App.addListener){
+    App.addListener('backButton',function(){
+      var ov=document.querySelector('.ov.on');
+      if(ov){var c=ov.querySelector('#ov-no,.close,button');if(c)c.click();else ov.classList.remove('on');return;}
+      var sv=document.getElementById('svw');
+      var scr=document.querySelector('.screen.on'); var id=scr&&scr.id;
+      if(id==='home'||id==='welcome'||id==='intro'||id==='reveal'){App.exitApp();return;}
+      var b=scr&&scr.querySelector('.back');
+      if(b)b.click(); else if(typeof go==='function')go('home');
+    });
+  }
+})();
+</script>
+</body>
+</html>
